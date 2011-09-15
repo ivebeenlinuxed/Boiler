@@ -1,5 +1,5 @@
 <?php
-class DBException extends Exception {}
+namespace System\Model;
 /**
  * DBObject.php
  *
