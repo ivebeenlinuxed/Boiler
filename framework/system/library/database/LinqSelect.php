@@ -1,4 +1,6 @@
 <?php
+namespace Library\Database;
+
 class LinqSelect implements LinqQuery {
 	public $obj;
 	public $start = false;

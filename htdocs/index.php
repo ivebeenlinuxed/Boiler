@@ -10,13 +10,22 @@ function __autoload($load) {
 	
 	if ($e[0] == "system") {
 		$e = array_slice($e, 1);
-		$loc = BOILER_LOCATION."system/".implode("/", $e)."/$class.php";
+		if (file_exists($loc = BOILER_LOCATION."system/".implode("/", $e)."/$class.php")) {
+			include $loc;
+			return;
+		}
 	} else {
-		$loc = BOILER_LOCATION."application/".implode("/", $e)."/$class.php";
+		if (file_exists($loc = BOILER_LOCATION."application/".implode("/", $e)."/$class.php")) {
+			include $loc;
+			return;
+		}
+		
+		if (file_exists($loc = BOILER_LOCATION."system/".implode("/", $e)."/$class.php")) {
+			include $loc;
+			return;
+		}
 	}
-	if (file_exists($loc)) {
-		include $loc;
-	}
+	
 }
 
 
@@ -24,5 +33,3 @@ if (isset($_SERVER['_']))
 	$call = Core\Router::getController(array_slice($_SERVER['argv'], 1));
 else
 	$call = Core\Router::getController(explode("/", substr($_SERVER['REQUEST_URI'], 1)));
-	
-var_dump($call);

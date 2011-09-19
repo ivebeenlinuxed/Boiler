@@ -1,12 +1,38 @@
 <?php
 namespace System\Core;
-
+/**
+ * 
+ * Routes new requests to correct controller
+ * @author ivebeenlinuxed
+ *
+ */
 abstract class Router {
+	/**
+	 * 
+	 * Default controller for home page
+	 * @var string
+	 */
 	protected static $defaultController = "Home";
+	
+	/**
+	 * 
+	 * If no callable function can be found in path, call this one
+	 * @var string
+	 */
 	protected static $defaultFunction = "index";
 	
-	protected static $fofHandler = array("Controller\\ErrorDocument", "404");
+	/**
+	 * 
+	 * Default 404 Error Handler
+	 * @var array
+	 */
+	protected static $fofHandler = array("Controller\\ErrorDocument", "fof");
 	
+	/**
+	 * 
+	 * Get correct controller, using the argument array
+	 * @param array $controllerArray
+	 */
 	public static function getController($controllerArray) {
 		var_dump($controllerArray);
 		if (count($controllerArray) == 1 && $controllerArray[0] == "") {

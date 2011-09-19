@@ -1,4 +1,5 @@
 <?php
+namespace Library\Database;
 class LinqUpdate implements LinqQuery {
 	public function __construct($db, $obj, $name="t") {
 		if (!is_a($db, LinqDB)) {

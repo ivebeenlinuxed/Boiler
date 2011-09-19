@@ -1,5 +1,6 @@
 <?php
-class LinqDB extends mysqli {
+namespace Library\Database;
+class LinqDB extends \mysqli {
 	protected $obj;
 	private static $masterDB;
 	public $db;

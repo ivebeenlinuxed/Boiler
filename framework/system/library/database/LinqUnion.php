@@ -1,4 +1,5 @@
 <?php
+namespace Library\Database;
 class LinqUnion implements LinqQuery {
 	private $selectQry;
 	

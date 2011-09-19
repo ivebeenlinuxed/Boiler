@@ -1,4 +1,5 @@
 <?php
+namespace Library\Database;
 abstract class LinqEquality {
 	protected $fields;
 	public $name = "";
