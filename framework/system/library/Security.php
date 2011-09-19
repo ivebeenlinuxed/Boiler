@@ -2,7 +2,7 @@
 namespace System\Library;
 
 class Security {
-	const STRIP_HTML;
-	const STRIP_SHELL;
-	const STRIP_SQL;
+	const STRIP_HTML = 0x01;
+	const STRIP_SHELL = 0x02;
+	const STRIP_SQL = 0x04;
 }

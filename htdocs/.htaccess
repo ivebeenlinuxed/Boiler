@@ -1,1 +1,3 @@
-#FIXME add logic
+RewriteEngine On
+RewriteBase /
+RewriteRule ^(.*)$ index.php?/$1 [L]
