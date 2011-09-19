@@ -34,9 +34,8 @@ abstract class Router {
 	 * @param array $controllerArray
 	 */
 	public static function getController($controllerArray) {
-		var_dump($controllerArray);
 		if (count($controllerArray) == 1 && $controllerArray[0] == "") {
-			return array("Controller\\".self::$defaultController, self::$defaultFunction);
+			return array("Controller\\".static::$defaultController, static::$defaultFunction, array());
 		}
 		for ($i=1; $i<=count($controllerArray); $i++) {
 			if (class_exists($c = "Controller\\".implode("\\", array_slice($controllerArray, 0, $i)), true)) {
@@ -47,8 +46,8 @@ abstract class Router {
 				}
 			}
 		}
-		if (isset($cOK) && is_callable(array($cOK, self::$defaultFunction))) {
-			return array($cOK, self::$defaultFunction, array_slice($controllerArray, $cOffset));
+		if (isset($cOK) && is_callable(array($cOK, static::$defaultFunction))) {
+			return array($cOK, static::$defaultFunction, array_slice($controllerArray, $cOffset));
 		}
 		return self::$fofHandler;
 	}

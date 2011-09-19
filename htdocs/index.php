@@ -1,6 +1,6 @@
 <?php
+define("START_MEM", memory_get_usage());
 define("BOILER_LOCATION", __DIR__."/../framework/");
-
 
 function __autoload($load) {
 	$e = explode("\\", $load);
@@ -33,3 +33,6 @@ if (isset($_SERVER['_']))
 	$call = Core\Router::getController(array_slice($_SERVER['argv'], 1));
 else
 	$call = Core\Router::getController(explode("/", substr($_SERVER['REQUEST_URI'], 1)));
+	
+$obj = new $call[0];
+call_user_func_array(array($obj, $call[1]), $call[2]);
