@@ -1,10 +1,12 @@
 [
 	{
-		"name": "Test 123",
-		"file": "http://www.ask.com/"
+		"name": "Clicktracker",
+		"file": "http://root.localhost/bf/_offline/clicktracker/clicktracker.zip",
+		"folder": "click_tracker"
 	},
 	{
 		"name": "Test 2",
-		"file": "http://test.com"
+		"file": "http://test.com",
+		"folder": "test2"
 	}
 ]

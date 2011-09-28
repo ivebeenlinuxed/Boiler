@@ -1,6 +1,7 @@
 <?php
 define("START_MEM", memory_get_usage());
 define("BOILER_LOCATION", __DIR__."/../framework/");
+define("BOILER_TMP", __DIR__."/../_offline/tmp/");
 
 function __autoload($load) {
 	$e = explode("\\", $load);
