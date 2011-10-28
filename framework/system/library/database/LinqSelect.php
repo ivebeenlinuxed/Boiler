@@ -16,14 +16,14 @@ class LinqSelect implements LinqQuery {
 	public $filter;
 	
 	public function __construct($db, $obj, $name="t") {
-		if (!@is_a($db, LinqDB)) {
+		if (!is_a($db, "\Library\Database\LinqDB")) {
 			throw new LinqException("Parameter 1 is not a LinqDB");
 		}
 		$this->db = $db;
-		if ((is_object($obj) && @is_a($obj, LinqSelect)) || (class_exists($obj) && @is_interface_of($obj,LinqObject)) ) {
+		if ((is_object($obj) && is_a($obj, "\Library\Database\LinqSelect")) || (class_exists($obj) && \System\Library\StdLib::is_interface_of($obj,"\Library\Database\LinqObject")) ) {
 			$this->obj = $obj;
 			$this->name = $name;
-		} elseif (class_exists($obj,LinqObject)) {
+		} elseif (class_exists($obj,"\Library\Database\LinqObject")) {
 			throw new LinqException("Not a LINQ object");
 		}
 		
@@ -41,7 +41,7 @@ class LinqSelect implements LinqQuery {
 	}
 	
 	public function getFrom() {
-		if (!is_object($this->obj) && class_exists($this->obj) && @is_interface_of($this->obj, LinqObject)) {
+		if (!is_object($this->obj) && class_exists($this->obj) && \System\Library\StdLib::is_interface_of($this->obj, "\Library\Database\LinqObject")) {
 			$o = $this->obj;
 			return "`".$o::getTable()."`";
 		} else {
@@ -50,7 +50,7 @@ class LinqSelect implements LinqQuery {
 	}
 	
 	public function getTable() {
-		if (!is_object($this->obj) && class_exists($this->obj) && @is_interface_of($this->obj, LinqObject)) {
+		if (!is_object($this->obj) && class_exists($this->obj) && \System\Library\StdLib::is_interface_of($this->obj, "\Library\Database\LinqObject")) {
 			$o = $this->obj;
 			return "`".$o::getTable(true)."`";
 		} else {
@@ -183,7 +183,7 @@ class LinqSelect implements LinqQuery {
 	}
 	
 	function joinRight($field, $select, $foreign) {
-		if ($select instanceof LinqSelect) {
+		if ($select instanceof \Library\Database\LinqSelect) {
 			$this->join[] = array("RIGHT", $field, $select, $foreign);
 		} else {
 			die("Not valid table");
@@ -211,7 +211,7 @@ class LinqSelect implements LinqQuery {
 	}
 	
 	function setFilter($f) {
-		if (!@is_subclass_of($f, LinqEquality)) {
+		if (!is_subclass_of($f, "\Library\Database\LinqEquality")) {
 			die("Must be a LINQ Equality");
 		} else {
 			$f->name = trim($this->getTable(),"`");

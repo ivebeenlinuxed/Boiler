@@ -19,7 +19,7 @@ namespace Model;
  * 
  * @abstract
  */
-abstract class DBObject implements LinqObject {
+abstract class DBObject implements \Library\Database\LinqObject {
 /**
  * @var int
  */
@@ -214,7 +214,7 @@ abstract class DBObject implements LinqObject {
 		
 		foreach ($p as $Key) {
 			if (!isset($id[$Key])) {
-				throw new DBException("Required key component '$Key' missing.");
+				throw new \Library\Database\DBException("Required key component '$Key' missing.");
 			}
 			$and->eq($Key, $id[$Key]);
 		}

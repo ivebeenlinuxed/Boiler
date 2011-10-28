@@ -1,5 +1,5 @@
 <?php
 namespace Library\Database;
-class LinqException extends Exception {
+class LinqException extends \Exception {
 }
 ?>
