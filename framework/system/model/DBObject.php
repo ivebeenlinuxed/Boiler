@@ -1,5 +1,7 @@
 <?php
 namespace Model;
+use Library\Database\DBException;
+
 /**
  * DBObject.php
  *
