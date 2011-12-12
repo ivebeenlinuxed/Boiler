@@ -1,5 +1,5 @@
 <?php
-namespace \System\Model;
+namespace System\Model;
 /**
  * DBObject.php
  *
