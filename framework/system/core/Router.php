@@ -34,7 +34,7 @@ abstract class Router {
 	 * @param array $controllerArray
 	 */
 	public static function getController($controllerArray) {
-		if ((count($controllerArray) == 1 && $controllerArray[0] == "") || is_array($controllerArray[0])) {
+		if ((count($controllerArray) == 1 && $controllerArray[0] == "") || count($controllerArray) == 0 || is_array($controllerArray[0])) {
 			return array("Controller\\".static::$defaultController, static::$defaultFunction, array());
 		}
 		for ($i=1; $i<=count($controllerArray) && !is_array($controllerArray[$i-1]); $i++) {
