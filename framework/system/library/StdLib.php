@@ -220,7 +220,7 @@ class StdLib {
 		return json_decode(json_encode(xml2array($data)));
 	}
 	
-	public static public static function xml2array($data) {
+	public static function xml2array($data) {
 		$data = simplexml_load_string($data);
 		return makeArray($data);
 	}
