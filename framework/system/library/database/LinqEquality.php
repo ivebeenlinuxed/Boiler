@@ -137,7 +137,7 @@ abstract class LinqEquality {
 		$v = "";
 		if (is_int($va) || is_bool($va) || is_float($va) || is_string($va)) {
 			$v = "'".$this->db->escape_string($va)."'";
-		} elseif (is_subclass_of($va, LinqQuery)) {
+		} elseif (is_subclass_of($va, "\Library\Database\LinqQuery")) {
 			switch ($SQ) {
 				case self::SUBQUERY_ANY:
 					$v = "";
@@ -147,7 +147,7 @@ abstract class LinqEquality {
 					$v = "";
 			}
 			$v = "(".$va->getSQL().")";
-		} elseif (is_subclass_of($va, LinqEquality)) {
+		} elseif (is_subclass_of($va, "\Library\Database\LinqEquality")) {
 			$v = "(".$va->getSQL().")";
 		} else {
 			throw new LinqException("Unknown type: ".gettype($va));
