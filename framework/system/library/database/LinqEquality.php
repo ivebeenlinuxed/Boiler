@@ -93,20 +93,19 @@ abstract class LinqEquality {
 					$field[0] = "$obj`".$this->db->escape_string($field[0])."`";
 					break;
 				case self::VALUE:
-					$field[0] = $this->getValue($field[0], $field[5]);
+					$field[0] = $this->getValue($field[0]);
 					break;
 			}
-			
 			switch ($field[4]) {
 				case self::FIELD:
 					if (is_object($field[2])) {
 						var_dump($field);
-						throw new Exception("Catch this!");
+						throw new DBException("Field value cannot be an object");
 					}
 					$field[2] = "$obj`".$this->db->escape_string($field[2])."`";
 					break;
 				case self::VALUE:
-					$field[2] = $this->getValue($field[2], $field[5]);
+					$field[2] = $this->getValue($field[2]);
 					break;
 			}
 			
@@ -133,19 +132,17 @@ abstract class LinqEquality {
 		return $sql;
 	}
 	
-	private function getValue($va, $SQ) {
+	private function getValue($va) { //,$SQ
 		$v = "";
 		if (is_int($va) || is_bool($va) || is_float($va) || is_string($va)) {
 			$v = "'".$this->db->escape_string($va)."'";
 		} elseif (is_subclass_of($va, "\Library\Database\LinqQuery")) {
-			switch ($SQ) {
+			/*switch ($SQ) {
 				case self::SUBQUERY_ANY:
-					$v = "";
 				case self::SUBQUERY_IN:
-					$v = "";
 				case self::SUBQUERY_SOME:
 					$v = "";
-			}
+			}*/
 			$v = "(".$va->getSQL().")";
 		} elseif (is_subclass_of($va, "\Library\Database\LinqEquality")) {
 			$v = "(".$va->getSQL().")";
@@ -153,6 +150,15 @@ abstract class LinqEquality {
 			throw new LinqException("Unknown type: ".gettype($va));
 		}
 		return $v;
+	}
+	
+	public function setName($name) {
+		$this->name = $name;
+		foreach ($this->fields as $field) {
+			if (is_object($field[2]) && is_subclass_of($field[2], "\Library\Database\LinqEquality")) {
+				$field[2]->setName($name);
+			}
+		}
 	}
 }
 ?>

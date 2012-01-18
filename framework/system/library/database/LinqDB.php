@@ -37,7 +37,13 @@ class LinqDB extends \mysqli {
 	
 	
 	function getOrFilter($obj="") {
-		return new LinqAND($this, $obj);
+		return new LinqOR($this, $obj);
+	}
+	
+	function getRawFilter($sql) {
+		$f = new LinqRawFilter($this);
+		$f->sql = $sql;
+		return $f;
 	}
 	
 	static function getDB($host=null, $user=null, $password=null, $db="") {

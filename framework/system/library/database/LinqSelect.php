@@ -40,6 +40,14 @@ class LinqSelect implements LinqQuery {
 		return new LinqSelect($this->db, $this, $name);
 	}
 	
+	public function getAndFilter() {
+		return $this->db->getAndFilter();
+	}
+	
+	public function getOrFilter() {
+		return $this->db->getOrFilter();
+	}
+	
 	public function getFrom() {
 		if (!is_object($this->obj) && class_exists($this->obj) && \System\Library\StdLib::is_interface_of($this->obj, "\Library\Database\LinqObject")) {
 			$o = $this->obj;
@@ -214,7 +222,7 @@ class LinqSelect implements LinqQuery {
 		if (!is_subclass_of($f, "\Library\Database\LinqEquality")) {
 			die("Must be a LINQ Equality");
 		} else {
-			$f->name = trim($this->getTable(),"`");
+			$f->setName(trim($this->getTable(),"`"));
 			$this->filter = $f;
 		}
 		return $this;

@@ -1,13 +1,12 @@
 <?php
 namespace Library\Database;
-use \System\Library\StdLib;
 class LinqUpdate implements LinqQuery {
 	public function __construct($db, $obj, $name="t") {
-		if (!is_a($db, "\\Library\\Database\\LinqDB")) {
+		if (!is_a($db, "\Library\Database\LinqDB")) {
 			throw new LinqException("Parameter 1 is not a LinqDB");
 		}
 		$this->DB = $db;
-		if (\class_exists($obj) && StdLib::is_interface_of($obj,"\\Library\\Database\\LinqObject")) {
+		if (class_exists($obj) && \System\Library\StdLib::is_interface_of($obj,"\Library\Database\LinqObject")) {
 			$this->obj = $obj;
 			$this->name = $name;
 		} else {
@@ -20,6 +19,7 @@ class LinqUpdate implements LinqQuery {
 		$this->set = array();
 		$this->filter = false;
 		$this->order = false;
+		$this->join = array();
 	}
 	
 	function Exec() {
@@ -27,7 +27,7 @@ class LinqUpdate implements LinqQuery {
 	}
 
 	function setFilter($f) {
-		if (!is_subclass_of($f, "\\Library\\Database\\LinqEquality")) {
+		if (!is_subclass_of($f, "\Library\Database\LinqEquality")) {
 			die("Must be a LINQ Equality");
 		} else {
 			$f->name = trim($this->getTable(),"`");
@@ -57,6 +57,11 @@ class LinqUpdate implements LinqQuery {
 		}
 		
 		
+		if (count($this->join) > 0) {
+			foreach ($this->join as $j) {
+				$f->subEq($j[2]->getFilters());
+			}
+		}
 		return $f;
 	}
 	
