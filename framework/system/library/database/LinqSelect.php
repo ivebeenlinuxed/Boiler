@@ -5,6 +5,7 @@ class LinqSelect implements LinqQuery {
 	public $obj;
 	public $start = false;
 	public $end = false;
+	public $distinct = false;
 	public $fields;
 	public $join;
 	public $name;
@@ -138,6 +139,9 @@ class LinqSelect implements LinqQuery {
 	public function getSQL() {
 		$o = $this->obj;
 		$sql = "SELECT";
+		if ($this->distinct) {
+			$sql .= " DISTINCT";
+		}
 		$s = $this->getSelects();
 		if ($s == "") {
 			$sql .= " ".$this->getTable().".*";
