@@ -37,7 +37,7 @@ else
 	if (strpos($req, "?")) {
 		$req = substr($req, 0, strpos($req, "?"));
 	}
-	$call = Core\Router::getController(explode("/", $req));
+	$call = Core\Router::getController(explode("/", trim($req, "/")));
 	
 $obj = new $call[0];
 call_user_func_array(array($obj, $call[1]), $call[2]);
