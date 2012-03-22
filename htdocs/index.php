@@ -33,7 +33,11 @@ function __autoload($load) {
 if (isset($_SERVER['_']))
 	$call = Core\Router::getController(array_slice($_SERVER['argv'], 1));
 else
-	$call = Core\Router::getController(explode("/", substr($_SERVER['QUERY_STRING'], 1)));
+	$req = $_SERVER['REQUEST_URI'];
+	if (strpos($req, "?")) {
+		$req = substr($req, 0, strpos($req, "?"));
+	}
+	$call = Core\Router::getController(explode("/", $req));
 	
 $obj = new $call[0];
 call_user_func_array(array($obj, $call[1]), $call[2]);

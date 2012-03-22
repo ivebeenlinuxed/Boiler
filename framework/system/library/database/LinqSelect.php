@@ -158,7 +158,11 @@ class LinqSelect implements LinqQuery {
 		
 		
 		if ($this->group !== false) {
-			$sql .= " GROUP BY ".$this->getTable().".`".$this->db->escape_string($this->group)."`";
+			if ($this->group[1] == false) {
+				$sql .= " GROUP BY ".$this->getTable().".`".$this->db->escape_string($this->group[0])."`";
+			} else {
+				$sql .= " GROUP BY ".$this->group[0];
+			}
 		}
 		//if ($this->filter) {
 		//	$sql .= " WHERE ".$this->filter->getSQL();
@@ -250,8 +254,8 @@ class LinqSelect implements LinqQuery {
 
 	}
 	
-	function setGroup($name) {
-		$this->group = $name;
+	function setGroup($name, $raw=false) {
+		$this->group = array($name, $raw);
 		return $this;
 	}
 	
