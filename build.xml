@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="My Project" default="build">
+
+	<property name="db" value="urban_walks" />
+	<property name="db_user" value="urban-walks" />
+	<property name="db_password" value="urbanwalkspasswd123=" />
+	<property name="db_server" value="localhost" />
+	<property name="db_port" value="3306" />
+
+	<target name="build" depends="db-config,test" />
+	<target name="test" depends="phpunit,phpcpd,phpmd,phpcs,skelgen" />
+	<target name="configure" depends="db-config" />
+
+
+	<!-- Housekeeping -->
+	<target name="clean">
+		<delete dir="${basedir}/build/logs" />
+		<delete dir="${basedir}/tests/framework" />
+	</target>
+
+	<target name="init" depends="clean">
+		<mkdir dir="${basedir}/build/logs" />
+	</target>
+
+	<!-- Configuration -->
+	<target name="db-config">
+		<exec executable="bash" dir="${basedir}/build" failonerror="off">
+			<arg
+				line=" 'dbconfig.sh' ${db} ${db_user} ${db_password} ${db_server} ${db_port}" />
+		</exec>
+	</target>
+
+	<target name="db-schema" depends="db-config">
+		<exec executable="php" dir="${basedir}/build" failonerror="off">
+			<arg line=" 'schema.php'" />
+		</exec>
+	</target>
+
+	<!-- Test Data -->
+	<target name="db-testdata" depends="db-schema">
+		<exec executable="php" dir="${basedir}/build" failonerror="off">
+			<arg line=" 'testdata.php'" />
+		</exec>
+	</target>
+
+	<!-- Testers -->
+	<target name="skelgen">
+		<exec executable="bash" dir="${basedir}" failonerror="off">
+			<arg line=" '${basedir}/build/build.sh'" />
+		</exec>
+	</target>
+
+	<target name="phpmd" depends="init">
+		<exec executable="phpmd" dir="${basedir}/framework" failonerror="off">
+			<arg
+				line=" '${basedir}/framework' xml codesize,unusedcode --reportfile '${basedir}/build/logs/pmd.xml'" />
+		</exec>
+	</target>
+
+	<target name="phpcs" depends="init">
+		<exec executable="phpcs" dir="${basedir}/framework"
+			output="${basedir}/build/logs/checkstyle.xml" failonerror="off">
+			<arg
+				line=" --report=checkstyle --tab-width=4 --standard=PEAR --extensions=php '${basedir}/framework'" />
+		</exec>
+	</target>
+
+	<target name="phpcpd" depends="init">
+		<exec executable="phpcpd" dir="${basedir}/framework" failonerror="off">
+			<arg
+				line=" --log-pmd '${basedir}/build/logs/phpcpd.xml' '${basedir}/framework'" />
+		</exec>
+	</target>
+
+	<target name="phpunit" depends="init,db-testdata,skelgen">
+		<exec executable="phpunit" dir="${basedir}" failonerror="off">
+			<arg
+				line=" --bootstrap '${basedir}/build/phpunit.php' --log-junit '${basedir}/build/logs/phpunit.xml' --coverage-clover '${basedir}/build/logs/clover.xml' --coverage-html '${basedir}/build/logs/coverage' '${basedir}/tests'" />
+		</exec>
+	</target>
+</project>

@@ -2,7 +2,41 @@ To install simply move htdocs to your public html directory, then set BOILER_LOC
 
 Controllers are the start point of your page.
 
-***CONTROLLERS***
+Testing and Building
+====================
+
+Building and testing (optional) is done with a build.xml make file for "ant". You may also consider using the following to help test your code.
+
+The following tools have a config shipped with ant targets, and are fully compatible with Hudson/Jenkins CI
+
+* PHP Mess Detector 
+
+pear channel-discover pear.phpmd.org 
+pear channel-discover pear.pdepend.org 
+pear install --alldeps phpmd/PHP_PMD
+ 
+* PHP CodeSniffer
+
+pear install PHP_CodeSniffer
+
+* PHP Copy and Paste detector
+
+pear channel-discover components.ez.no
+pear install phpunit/phpcpd
+
+* PHPUnit
+
+pear channel-discover pear.phpunit.de
+pear channel-discover pear.symfony-project.com
+pear install phpunit/PHPUnit
+
+* PHPUnit skelgen
+
+pear install phpunit/PHPUnit_SkeletonGenerator
+
+
+CONTROLLERS
+===========
 
 -Namespacing follows folder structure to allow PHP lazy loading (please see php.net for Namespacing and __autoload)
 -All classes must be namespaced with Controller. This is to allow you to have a controller and model, for example, with the same name.
@@ -24,13 +58,15 @@ $c = new \Controller\ns1\ns2\ns3\Class();
 $c->function();
 
 
-***MODELS***
+MODELS
+======
 
 -Models should extend DBObject normally for MySQL objects
 -Models must be namespaced
 -DBObject class (found in application/model/DBObject.php) must have login details entered for PHP
 
 <?php
+namespace Model;
 class MySQLTable extends DBObject {
 	public static function getTable($read=true) {
 		return "mysql_table_name";
@@ -42,7 +78,7 @@ class MySQLTable extends DBObject {
 		return array("concat", "key");
 	}
 }
-//That's it! No SQL!
+//That's it! No SQL! Your MySQL settings are retrieved from a config.php file, built by ant. This stops you committing your MySQL details to git - pretty irritating!
 ?>
 
 
