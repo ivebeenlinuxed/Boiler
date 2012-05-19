@@ -1,35 +1,37 @@
 <?php
 namespace System\Core;
 /**
- * 
+ *
  * Routes new requests to correct controller
  * @author ivebeenlinuxed
  *
  */
 abstract class Router {
+	
+	public static $settings;
 	/**
-	 * 
+	 *
 	 * Default controller for home page
 	 * @var string
 	 */
 	protected static $defaultController = "Home";
-	
+
 	/**
-	 * 
+	 *
 	 * If no callable function can be found in path, call this one
 	 * @var string
 	 */
 	protected static $defaultFunction = "index";
-	
+
 	/**
-	 * 
+	 *
 	 * Default 404 Error Handler
 	 * @var array
 	 */
 	protected static $fofHandler = array("Controller\\ErrorDocument", "index");
-	
+
 	/**
-	 * 
+	 *
 	 * Get correct controller, using the argument array
 	 * @param array $controllerArray
 	 */
@@ -46,6 +48,13 @@ abstract class Router {
 				}
 				$cArgs = array_slice($controllerArray, $i);
 			}
+			if (class_exists($c = "System\\Controller\\".implode("\\", array_slice($controllerArray, 0, $i)), true)) {
+				$cOK = $c;
+				if (isset($controllerArray[$i]) && is_callable(array($c, $f = $controllerArray[$i]))) {
+					return array($c, $f, array_slice($controllerArray, $i+1));
+				}
+				$cArgs = array_slice($controllerArray, $i);
+			}
 			$controllerArray[$i-1] = strtolower($controllerArray[$i-1]);
 		}
 		if (isset($cOK) && is_callable(array($cOK, static::$defaultFunction))) {
@@ -56,11 +65,18 @@ abstract class Router {
 		return self::$fofHandler;
 	}
 	
+	public static function Init() {
+		if (file_exists(BOILER_LOCATION."../config.php")) {
+			require BOILER_LOCATION."../config.php";
+			self::$settings = $settings;
+		}
+	}
+
 	public static function getErrorPage($error) {
 		$obj = new self::$fofHandler[0];
 		call_user_func_array(array($obj, self::$fofHandler[1]), array($error));
 	}
-	
+
 	public static function loadView($view, $variables=array()) {
 		if (strpos($view, ".") !== false) {
 			throw new Exception("Cannot load views with dots in them");
@@ -70,7 +86,7 @@ abstract class Router {
 		}
 		include BOILER_LOCATION."application/view/$view.php";
 	}
-	
+
 	public static function loadHelper($helper, $variables=array()) {
 		if (strpos($view, ".") !== false) {
 			throw new Exception("Cannot load views with dots in them");
@@ -84,6 +100,6 @@ abstract class Router {
 		if (file_exists(BOILER_LOCATION."application/helper/$helper.php")) {
 			include_once BOILER_LOCATION."application/helper/$helper.php";
 		}
-		
+
 	}
 }

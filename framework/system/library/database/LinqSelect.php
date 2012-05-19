@@ -13,9 +13,9 @@ class LinqSelect implements LinqQuery {
 	public $group;
 	public $order;
 	public $orderAsc;
-	
+
 	public $filter;
-	
+
 	public function __construct($db, $obj, $name="t") {
 		if (!is_a($db, "\Library\Database\LinqDB")) {
 			throw new LinqException("Parameter 1 is not a LinqDB");
@@ -27,28 +27,28 @@ class LinqSelect implements LinqQuery {
 		} elseif (class_exists($obj,"\Library\Database\LinqObject")) {
 			throw new LinqException("Not a LINQ object");
 		}
-		
-		
-		
+
+
+
 		$this->fields = array();
 		$this->filter = false;
 		$this->join = array();
 		$this->group = false;
 		$this->order = false;
 	}
-	
+
 	public function Select($name="t") {
 		return new LinqSelect($this->db, $this, $name);
 	}
-	
+
 	public function getAndFilter() {
 		return $this->db->getAndFilter();
 	}
-	
+
 	public function getOrFilter() {
 		return $this->db->getOrFilter();
 	}
-	
+
 	public function getFrom() {
 		if (!is_object($this->obj) && class_exists($this->obj) && \System\Library\StdLib::is_interface_of($this->obj, "\Library\Database\LinqObject")) {
 			$o = $this->obj;
@@ -57,7 +57,7 @@ class LinqSelect implements LinqQuery {
 			return "(".$this->obj->getSQL().") AS ".$this->name;
 		}
 	}
-	
+
 	public function getTable() {
 		if (!is_object($this->obj) && class_exists($this->obj) && \System\Library\StdLib::is_interface_of($this->obj, "\Library\Database\LinqObject")) {
 			$o = $this->obj;
@@ -66,10 +66,10 @@ class LinqSelect implements LinqQuery {
 			return "`".$this->name."`";
 		}
 	}
-	
+
 	public function getSelects() {
 		$sql = "";
-		
+
 		if (count($this->fields) > 0) {
 			foreach ($this->fields as $field) {
 				$sql .= $field[0];
@@ -79,9 +79,9 @@ class LinqSelect implements LinqQuery {
 				$sql .= ", ";
 			}
 		}
-		
-		
-		
+
+
+
 		if (count($this->join) > 0) {
 			foreach ($this->join as $jo) {
 				$j = $jo[2];
@@ -90,26 +90,26 @@ class LinqSelect implements LinqQuery {
 					$sql .= " ".$s.", ";
 				}
 				/*
-				$j = $jo[1];
+				 $j = $jo[1];
 				if (count($j->fields) == 0) {
-					$j->fields[] = "*";
+				$j->fields[] = "*";
 				}
 				foreach ($j->fields as $field) {
-					if ($field != "*") {
-						$field = "`".$field."`";
-					}
-					$sql .= "`".$j->getTable()."`.".$field.", ";
+				if ($field != "*") {
+				$field = "`".$field."`";
+				}
+				$sql .= "`".$j->getTable()."`.".$field.", ";
 				}
 				*/
 			}
 		}
-		
+
 		if (substr($sql, -2) == ", ") {
 			$sql = substr($sql, 0, strlen($sql)-2);
 		}
 		return $sql;
 	}
-	
+
 	public function getJoins() {
 		$sql = "";
 		if (count($this->join) > 0) {
@@ -118,12 +118,12 @@ class LinqSelect implements LinqQuery {
 				$sql .= " ".$j[0]." JOIN ".$sj->getFrom()." ON ".$sj->getTable().".`".$j[3]."`=".$this->getTable().".`".$j[1]."`";
 				$sql .= $sj->getJoins();
 			}
-			
-			
+
+
 		}
 		return $sql;
 	}
-	
+
 	public function getFilters() {
 		if (!$this->filter) {
 			$f = $this->db->getAndFilter();
@@ -135,7 +135,7 @@ class LinqSelect implements LinqQuery {
 		}
 		return $f;
 	}
-	
+
 	public function getSQL() {
 		$o = $this->obj;
 		$sql = "SELECT";
@@ -154,9 +154,9 @@ class LinqSelect implements LinqQuery {
 		if ($where != "") {
 			$sql .= " WHERE ".$where;
 		}
-		
-		
-		
+
+
+
 		if ($this->group !== false) {
 			if ($this->group[1] == false) {
 				$sql .= " GROUP BY ".$this->getTable().".`".$this->db->escape_string($this->group[0])."`";
@@ -179,7 +179,7 @@ class LinqSelect implements LinqQuery {
 				}
 			}
 		}
-		
+
 		if ($this->start !== false) {
 			$sql .= " LIMIT {$this->start}";
 			if ($this->end !== false) {
@@ -188,7 +188,7 @@ class LinqSelect implements LinqQuery {
 		}
 		return $sql;
 	}
-	
+
 	function joinLeft($field, $select, $foreign) {
 		if ($select instanceof LinqSelect) {
 			$this->join[] = array("LEFT", $field, $select, $foreign);
@@ -197,7 +197,7 @@ class LinqSelect implements LinqQuery {
 		}
 		return $this;
 	}
-	
+
 	function joinRight($field, $select, $foreign) {
 		if ($select instanceof \Library\Database\LinqSelect) {
 			$this->join[] = array("RIGHT", $field, $select, $foreign);
@@ -206,7 +206,7 @@ class LinqSelect implements LinqQuery {
 		}
 		return $this;
 	}
-	
+
 	function addField($f, $as=null) {
 		if ($f != "*") {
 			$f = "`".$f."`";
@@ -214,18 +214,18 @@ class LinqSelect implements LinqQuery {
 		$this->fields[] = array($this->getTable().".".$this->db->escape_string($f), $this->db->escape_string($as));
 		return $this;
 	}
-	
+
 	function getFullName($f) {
 		if ($f != "*") {
 			$f = "`".$f."`";
 		}
 		return $this->getTable().".".$this->db->escape_string($f);
 	}
-	
+
 	function addRaw($sum, $as) {
 		$this->fields[] = array($sum, $this->db->escape_string($as));
 	}
-	
+
 	function setFilter($f) {
 		if (!is_subclass_of($f, "\Library\Database\LinqEquality")) {
 			die("Must be a LINQ Equality");
@@ -235,7 +235,7 @@ class LinqSelect implements LinqQuery {
 		}
 		return $this;
 	}
-	
+
 	function addCount($field, $name="*") {
 		if ($name != "*") {
 			$name = "`".$this->db->escape_string($name)."`";
@@ -243,7 +243,7 @@ class LinqSelect implements LinqQuery {
 		$this->fields[] = array("COUNT(".$name.")", $this->db->escape_string($field));
 		return $this;
 	}
-	
+
 	function setLimit($start, $end) {
 		if (!is_int($start) || !is_int($end)) {
 			throw LinqException("Limit must be integer");
@@ -253,12 +253,12 @@ class LinqSelect implements LinqQuery {
 		return $this;
 
 	}
-	
+
 	function setGroup($name, $raw=false) {
 		$this->group = array($name, $raw);
 		return $this;
 	}
-	
+
 	function setOrder($name, $asc=false) {
 		$this->order = $name;
 		if ($asc) {
@@ -268,7 +268,7 @@ class LinqSelect implements LinqQuery {
 		}
 		return $this;
 	}
-	
+
 	function Exec() {
 		return $this->db->Exec($this->getSQL());
 	}

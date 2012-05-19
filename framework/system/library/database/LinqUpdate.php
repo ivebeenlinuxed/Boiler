@@ -12,16 +12,16 @@ class LinqUpdate implements LinqQuery {
 		} else {
 			throw new LinqException("Not a LINQ object");
 		}
-		
+
 		$this->start = false;
 		$this->end = false;
-		
+
 		$this->set = array();
 		$this->filter = false;
 		$this->order = false;
 		$this->join = array();
 	}
-	
+
 	function Exec() {
 		return $this->DB->Exec($this->getSQL());
 	}
@@ -36,17 +36,17 @@ class LinqUpdate implements LinqQuery {
 		return $this;
 	}
 
-	
+
 	public function getTable() {
 		$o = $this->obj;
 		return "`".$o::getTable(true)."`";
 	}
-	
+
 	public function addSet($field, $data=false) {
 		$this->set[$field] = $data;
 		return $this;
 	}
-	
+
 	public function getFilters() {
 		if (count($this->filter) > 0) {
 			if (!$this->filter) {
@@ -55,8 +55,8 @@ class LinqUpdate implements LinqQuery {
 				$f = $this->filter;
 			}
 		}
-		
-		
+
+
 		if (count($this->join) > 0) {
 			foreach ($this->join as $j) {
 				$f->subEq($j[2]->getFilters());
@@ -64,7 +64,7 @@ class LinqUpdate implements LinqQuery {
 		}
 		return $f;
 	}
-	
+
 	function setLimit($end) {
 		if (!is_int($end)) {
 			throw LinqException("Limit must be integer");
@@ -73,7 +73,7 @@ class LinqUpdate implements LinqQuery {
 		return $this;
 
 	}
-	
+
 	function setOrder($name, $asc=false) {
 		$this->order = $name;
 		if ($asc) {
@@ -83,18 +83,18 @@ class LinqUpdate implements LinqQuery {
 		}
 		return $this;
 	}
-	
+
 	public function getSQL() {
 		$o = $this->obj;
 		$sql = "UPDATE ";
 		$sql .= " ".$this->getTable();
-		
+
 		$sql .= " SET ";
-		
+
 		if (count($this->set) == 0) {
 			throw new LinqException('No fields to set');
 		}
-		
+
 		foreach ($this->set as $Key=>$Data) {
 			if ($Data === false) {
 				$sql .= "`".$this->DB->escape_string($Key)."`=DEFAULT, ";
@@ -105,13 +105,13 @@ class LinqUpdate implements LinqQuery {
 			}
 		}
 		$sql = substr($sql, 0, -2);
-		
-		
+
+
 		$where = $this->getFilters()->getSQL();
 		if ($where != "") {
 			$sql .= " WHERE ".$where;
 		}
-		
+
 		if ($this->order !== false) {
 			$sql .= " ORDER BY `".$this->DB->escape_string($this->order)."`";
 			if ($this->orderAsc) {
@@ -120,8 +120,8 @@ class LinqUpdate implements LinqQuery {
 				$sql .= " DESC";
 			}
 		}
-		
-		
+
+
 		if ($this->end !== false) {
 			$sql .= " LIMIT {$this->end}";
 		}
