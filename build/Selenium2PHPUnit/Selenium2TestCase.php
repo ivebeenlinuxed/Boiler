@@ -202,7 +202,6 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 			$result->getCodeCoverage()->append(
 					$this->getCodeCoverage(), $this
 			);
-			var_dump($result->getCodeCoverage());
 		}
 
 		return $result;
