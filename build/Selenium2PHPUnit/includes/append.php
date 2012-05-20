@@ -66,5 +66,4 @@ if (\Core\Router::$settings['test']['enabled'] && isset($_COOKIE['PHPUNIT_SELENI
       $name = $file . '.' . md5(uniqid(rand(), TRUE)) . '.' . $_COOKIE['PHPUNIT_SELENIUM_TEST_ID'],
       serialize($data)
     );
-    var_dump($data);
 }
