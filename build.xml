@@ -20,6 +20,7 @@
 
 	<target name="init" depends="clean">
 		<mkdir dir="${basedir}/build/logs" />
+		<chmod dir="${basedir}/build/logs" perm="0777" />
 	</target>
 
 	<!-- Configuration -->

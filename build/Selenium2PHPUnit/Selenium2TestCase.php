@@ -127,7 +127,7 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 	 * @var string
 	 */
 	protected $coverageDomain = false;
-	
+
 	/**
 	 * @param boolean
 	 */
@@ -135,7 +135,7 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 	{
 		self::$shareSession = $shareSession;
 	}
-	
+
 
 	/**
 	 * @param  string $name
@@ -317,8 +317,8 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 		} else {
 			self::$sessionId = $this->start($this->coverageDomain);
 		}
-		
-		
+
+
 		return self::$sessionId;
 	}
 
@@ -631,192 +631,220 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 	 */
 	protected function getCodeCoverage()
 	{
+		$coverage = array();
 		if (!empty($this->coverageScriptUrl)) {
-			$coverage = array();
-			$files = glob($this->coverageScriptUrl."/*".$this->testId);
-			if (count($files) == 1) {
-				$file = $files[0];
-				$data = unserialize(file_get_contents($file));
-				unlink($file);
-				unset($file);
-				return $data;
+			if (is_dir($this->coverageScriptUrl)) {
+				$files = glob($this->coverageScriptUrl."/*".$this->testId);
+				foreach ($files as $file) {
+					$data = unserialize(file_get_contents($file));
+					unlink($file);
+					unset($file);
+					foreach ($data as $file => $lines) {
+						if (!isset($coverage[$file])) {
+							$coverage[$file] = $lines;
+						} else {
+							foreach ($lines as $line => $flag) {
+								if (!isset($coverage[$file][$line]) ||
+										$flag > $coverage[$file][$line]) {
+									$coverage[$file][$line] = $flag;
+								}
+							}
+						}
+					}
+				}
+			} elseif (parse_url($this->coverageScriptUrl) !== false) {
+				$url = sprintf(
+						'%s?PHPUNIT_SELENIUM_TEST_ID=%s',
+						$this->coverageScriptUrl,
+						$this->testId
+				);
+				
+				$buffer = @file_get_contents($url);
+				if ($buffer !== FALSE) {
+					$coverageData = unserialize($buffer);
+					if (is_array($coverageData)) {
+						return $this->matchLocalAndRemotePaths($coverageData);
+					} else {
+						throw new Exception('Empty or invalid code coverage data received from url "' . $url . '"');
+					}
+				}
 			}
 		}
-	
 
-	return array();
-}
 
-/**
- * @param  array $coverage
- * @return array
- * @author Mattis Stordalen Flister <mattis@xait.no>
- */
-protected function matchLocalAndRemotePaths(array $coverage)
-{
-	$coverageWithLocalPaths = array();
+		return $coverage;
+	}
 
-	foreach ($coverage as $originalRemotePath => $data) {
-		$remotePath = $originalRemotePath;
-		$separator  = $this->findDirectorySeparator($remotePath);
+	/**
+	 * @param  array $coverage
+	 * @return array
+	 * @author Mattis Stordalen Flister <mattis@xait.no>
+	 */
+	protected function matchLocalAndRemotePaths(array $coverage)
+	{
+		$coverageWithLocalPaths = array();
 
-		while (!($localpath = PHPUnit_Util_Filesystem::fileExistsInIncludePath($remotePath)) &&
-				strpos($remotePath, $separator) !== FALSE) {
-			$remotePath = substr($remotePath, strpos($remotePath, $separator) + 1);
+		foreach ($coverage as $originalRemotePath => $data) {
+			$remotePath = $originalRemotePath;
+			$separator  = $this->findDirectorySeparator($remotePath);
+
+			while (!($localpath = PHPUnit_Util_Filesystem::fileExistsInIncludePath($remotePath)) &&
+					strpos($remotePath, $separator) !== FALSE) {
+				$remotePath = substr($remotePath, strpos($remotePath, $separator) + 1);
+			}
+
+			if ($localpath && md5_file($localpath) == $data['md5']) {
+				$coverageWithLocalPaths[$localpath] = $data['coverage'];
+			}
 		}
 
-		if ($localpath && md5_file($localpath) == $data['md5']) {
-			$coverageWithLocalPaths[$localpath] = $data['coverage'];
+		return $coverageWithLocalPaths;
+	}
+
+	/**
+	 * @param  string $path
+	 * @return string
+	 * @author Mattis Stordalen Flister <mattis@xait.no>
+	 */
+	protected function findDirectorySeparator($path)
+	{
+		if (strpos($path, '/') !== FALSE) {
+			return '/';
+		}
+
+		return '\\';
+	}
+
+	/**
+	 * @param  string $path
+	 * @return array
+	 * @author Mattis Stordalen Flister <mattis@xait.no>
+	 */
+	protected function explodeDirectories($path)
+	{
+		return explode($this->findDirectorySeparator($path), dirname($path));
+	}
+
+	/**
+	 * @param  string $directory
+	 * @param  string $suffix
+	 * @return array
+	 */
+	protected static function getSeleneseFiles($directory, $suffix)
+	{
+		$facade = new File_Iterator_Facade;
+
+		return $facade->getFilesAsArray($directory, $suffix);
+	}
+
+	/**
+	 * @param  string $action
+	 */
+	public function runDefaultAssertions($action)
+	{
+		if (!$this->inDefaultAssertions) {
+			$this->inDefaultAssertions = TRUE;
+			$this->defaultAssertions($action);
+			$this->inDefaultAssertions = FALSE;
 		}
 	}
 
-	return $coverageWithLocalPaths;
-}
+	/**
+	 * This method is called when a test method did not execute successfully.
+	 *
+	 * @param Exception $e
+	 */
+	protected function onNotSuccessfulTest(Exception $e)
+	{
+		if (!$this->serverRunning) {
+			throw $e;
+		}
 
-/**
- * @param  string $path
- * @return string
- * @author Mattis Stordalen Flister <mattis@xait.no>
- */
-protected function findDirectorySeparator($path)
-{
-	if (strpos($path, '/') !== FALSE) {
-		return '/';
-	}
 
-	return '\\';
-}
+		$this->restoreSessionStateAfterFailedTest();
+		$buffer  = 'Current URL: ' . $this->drivers[0]->getCurrentUrl() .
+		"\n"."Current Browser: {$this->drivers[0]->getBrowser()}";
+		try {
+			if ($this->captureScreenshotOnFailure) {
+				$screenshotInfo = $this->takeScreenshot();
+				if ($screenshotInfo != '') {
+					$buffer .= $screenshotInfo;
+				}
+			}
 
-/**
- * @param  string $path
- * @return array
- * @author Mattis Stordalen Flister <mattis@xait.no>
- */
-protected function explodeDirectories($path)
-{
-	return explode($this->findDirectorySeparator($path), dirname($path));
-}
+			$this->stopSession();
+		} catch (Exception $another) {
+			$buffer = "Issues while capturing the screenshot:\n" . $another->getMessage();
+		}
 
-/**
- * @param  string $directory
- * @param  string $suffix
- * @return array
- */
-protected static function getSeleneseFiles($directory, $suffix)
-{
-	$facade = new File_Iterator_Facade;
+		if ($e instanceof PHPUnit_Framework_ExpectationFailedException
+				&& is_object($e->getComparisonFailure())) {
+			$message = $e->getComparisonFailure()->toString();
+		} else {
+			$message = $e->getMessage();
+		}
 
-	return $facade->getFilesAsArray($directory, $suffix);
-}
+		$buffer .= "\n" . $message;
 
-/**
- * @param  string $action
- */
-public function runDefaultAssertions($action)
-{
-	if (!$this->inDefaultAssertions) {
-		$this->inDefaultAssertions = TRUE;
-		$this->defaultAssertions($action);
-		$this->inDefaultAssertions = FALSE;
-	}
-}
-
-/**
- * This method is called when a test method did not execute successfully.
- *
- * @param Exception $e
- */
-protected function onNotSuccessfulTest(Exception $e)
-{
-	if (!$this->serverRunning) {
-		throw $e;
-	}
-	
-	
-	$this->restoreSessionStateAfterFailedTest();
-	$buffer  = 'Current URL: ' . $this->drivers[0]->getCurrentUrl() .
-	"\n"."Current Browser: {$this->drivers[0]->getBrowser()}";
-	try {
+		// gain the screenshot path, lose the stack trace
 		if ($this->captureScreenshotOnFailure) {
-			$screenshotInfo = $this->takeScreenshot();
-			if ($screenshotInfo != '') {
-				$buffer .= $screenshotInfo;
-			}
+			throw new PHPUnit_Framework_Error($buffer, $e->getCode(), $e->getFile(), $e->getLine(), $e->getTrace());
 		}
 
-		$this->stopSession();
-	} catch (Exception $another) {
-		$buffer = "Issues while capturing the screenshot:\n" . $another->getMessage();
-	}
+		// yes to stack trace and everything
+		if ($e instanceof PHPUnit_Framework_IncompleteTestError
+				|| $e instanceof PHPUnit_Framework_SkippedTestError
+				|| $e instanceof PHPUnit_Framework_AssertionFailedError) {
+			throw $e;
+		}
 
-	if ($e instanceof PHPUnit_Framework_ExpectationFailedException
-			&& is_object($e->getComparisonFailure())) {
-		$message = $e->getComparisonFailure()->toString();
-	} else {
-		$message = $e->getMessage();
-	}
-
-	$buffer .= "\n" . $message;
-
-	// gain the screenshot path, lose the stack trace
-	if ($this->captureScreenshotOnFailure) {
+		// yes to stack trace, only for F tests
+		// PHPUnit issue 471 prevents getTrace() from being useful
 		throw new PHPUnit_Framework_Error($buffer, $e->getCode(), $e->getFile(), $e->getLine(), $e->getTrace());
 	}
 
-	// yes to stack trace and everything
-	if ($e instanceof PHPUnit_Framework_IncompleteTestError
-			|| $e instanceof PHPUnit_Framework_SkippedTestError
-			|| $e instanceof PHPUnit_Framework_AssertionFailedError) {
-		throw $e;
+	private function restoreSessionStateAfterFailedTest()
+	{
+		self::$sessionId = NULL;
 	}
 
-	// yes to stack trace, only for F tests
-	// PHPUnit issue 471 prevents getTrace() from being useful
-	throw new PHPUnit_Framework_Error($buffer, $e->getCode(), $e->getFile(), $e->getLine(), $e->getTrace());
-}
+	/**
+	 * Returns correct path to screenshot save path.
+	 *
+	 * @return string
+	 */
+	protected function getScreenshotPath()
+	{
+		$path = $this->screenshotPath;
 
-private function restoreSessionStateAfterFailedTest()
-{
-	self::$sessionId = NULL;
-}
+		if (!in_array(substr($path, strlen($path) -1, 1), array("/","\\"))) {
+			$path .= DIRECTORY_SEPARATOR;
+		}
 
-/**
- * Returns correct path to screenshot save path.
- *
- * @return string
- */
-protected function getScreenshotPath()
-{
-	$path = $this->screenshotPath;
-
-	if (!in_array(substr($path, strlen($path) -1, 1), array("/","\\"))) {
-		$path .= DIRECTORY_SEPARATOR;
+		return $path;
 	}
 
-	return $path;
-}
+	/**
+	 * Take a screenshot and return information about it.
+	 * Return an empty string if the screenshotPath and screenshotUrl
+	 * properties are empty.
+	 * Issue #88.
+	 *
+	 * @access protected
+	 * @return string
+	 */
+	protected function takeScreenshot()
+	{
+		if (!empty($this->screenshotPath) &&
+				!empty($this->screenshotUrl)) {
+			$filename = $this->getScreenshotPath() . $this->testId . '.png';
 
-/**
- * Take a screenshot and return information about it.
- * Return an empty string if the screenshotPath and screenshotUrl
- * properties are empty.
- * Issue #88.
- *
- * @access protected
- * @return string
- */
-protected function takeScreenshot()
-{
-	if (!empty($this->screenshotPath) &&
-			!empty($this->screenshotUrl)) {
-		$filename = $this->getScreenshotPath() . $this->testId . '.png';
+			$this->drivers[0]->captureEntirePageScreenshot($filename);
 
-		$this->drivers[0]->captureEntirePageScreenshot($filename);
-
-		return 'Screenshot: ' . $this->screenshotUrl . '/' .
-				$this->testId . ".png\n";
-	} else {
-		return '';
+			return 'Screenshot: ' . $this->screenshotUrl . '/' .
+					$this->testId . ".png\n";
+		} else {
+			return '';
+		}
 	}
-}
 }
