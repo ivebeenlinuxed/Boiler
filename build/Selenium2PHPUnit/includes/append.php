@@ -42,7 +42,7 @@
  * @since      File available since Release 1.0.0
  */
 
-if (\Core\Router::$settings['test']['enabled'] && isset($_COOKIE['PHPUNIT_SELENIUM_TEST_ID']) &&
+if (isset(\Core\Router::$settings['test']['enabled']) && \Core\Router::$settings['test']['enabled'] == true && isset($_COOKIE['PHPUNIT_SELENIUM_TEST_ID']) &&
     !isset($_GET['PHPUNIT_SELENIUM_TEST_ID']) &&
     extension_loaded('xdebug')) {
     $GLOBALS['PHPUNIT_FILTERED_FILES'][] = __FILE__;

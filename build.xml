@@ -7,7 +7,7 @@
 	<property name="db_server" value="localhost" />
 	<property name="db_port" value="3306" />
 
-	<target name="build" depends="db-config,test" />
+	<target name="build" depends="db-config" />
 	<target name="test" depends="phpunit,phpcpd,phpmd,phpcs,skelgen" />
 	<target name="configure" depends="db-config" />
 
