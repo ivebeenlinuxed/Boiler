@@ -1,0 +1,6 @@
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+
+php $DIR"/../../build/testdata_save.php";
+php $DIR"/../../build/schema_save.php";
+git add build/testdata.sql
+git add build/schema.sql

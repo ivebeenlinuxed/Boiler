@@ -1,0 +1,4 @@
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+
+php $DIR"/../../build/testdata_load.php";
+php $DIR"/../../build/schema_load.php";
