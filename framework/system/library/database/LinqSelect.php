@@ -135,7 +135,13 @@ class LinqSelect implements LinqQuery {
 		}
 		return $f;
 	}
-
+	
+	/**
+	 * Gets the SQL string of the query
+	 * 
+	 * @see Library\Database\LinqQuery::getSQL()
+	 * @return string The SQL Query to be executed
+	 */
 	public function getSQL() {
 		$o = $this->obj;
 		$sql = "SELECT";
@@ -235,7 +241,15 @@ class LinqSelect implements LinqQuery {
 		}
 		return $this;
 	}
-
+	
+	/**
+	 * Adds a count field to the mix
+	 * 
+	 * @param string $field The name of the field where the result should be put
+	 * @param string $name  The column to count the unique values in (* = all rows)
+	 * 
+	 * @return \Library\Database\LinqSelect
+	 */
 	function addCount($field, $name="*") {
 		if ($name != "*") {
 			$name = "`".$this->db->escape_string($name)."`";
@@ -243,7 +257,15 @@ class LinqSelect implements LinqQuery {
 		$this->fields[] = array("COUNT(".$name.")", $this->db->escape_string($field));
 		return $this;
 	}
-
+	
+	/**
+	 * The limit of the query (in MySQL: LIMIT $start, $end)
+	 * 
+	 * @param int $start Starting row
+	 * @param int $end   Number of rows
+	 * 
+	 * @return \Library\Database\LinqSelect
+	 */
 	function setLimit($start, $end) {
 		if (!is_int($start) || !is_int($end)) {
 			throw LinqException("Limit must be integer");
@@ -253,12 +275,28 @@ class LinqSelect implements LinqQuery {
 		return $this;
 
 	}
-
+	
+	/**
+	 * Adds a GROUP BY
+	 * 
+	 * @param string $name The column which to group by
+	 * @param string $raw  If true, $name is not escaped
+	 * 
+	 * @return \Library\Database\LinqSelect
+	 */
 	function setGroup($name, $raw=false) {
 		$this->group = array($name, $raw);
 		return $this;
 	}
-
+	
+	/**
+	 * Adds a ORDER BY to the query
+	 * 
+	 * @param string $name Name of column to order by
+	 * @param bool   $asc  If true sorts ascending (default false)
+	 * 
+	 * @return \Library\Database\LinqSelect
+	 */
 	function setOrder($name, $asc=false) {
 		$this->order = $name;
 		if ($asc) {
@@ -268,7 +306,12 @@ class LinqSelect implements LinqQuery {
 		}
 		return $this;
 	}
-
+	
+	/**
+	 * Executes the SQL Query on the database
+	 * 
+	 * @see Library\Database\LinqQuery::Exec()
+	 */
 	function Exec() {
 		return $this->db->Exec($this->getSQL());
 	}

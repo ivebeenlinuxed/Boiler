@@ -4,6 +4,7 @@ namespace System\Core;
  * Routes new requests to correct controller
  * 
  * @author ivebeenlinuxed <will@bcslichfield.com>
+ * @link   http://www.bcslichfield.com
  *
  */
 abstract class Router {
