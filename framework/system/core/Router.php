@@ -3,8 +3,12 @@ namespace System\Core;
 /**
  * Routes new requests to correct controller
  * 
- * @author ivebeenlinuxed <will@bcslichfield.com>
- * @link   http://www.bcslichfield.com
+ * @category Core
+ * @package  Boiler
+ * @author   ivebeenlinuxed <will@bcslichfield.com>
+ * @license  GNU v3.0 http://www.gnu.org/licenses/gpl-3.0.txt
+ * @version  GIT: $Id$
+ * @link     http://www.bcslichfield.com
  *
  */
 abstract class Router {
@@ -30,7 +34,15 @@ abstract class Router {
 	 * @var array
 	 */
 	protected static $fofHandler = array("Controller\\ErrorDocument", "index");
-
+	
+	/**
+	 * Used to hold all the listeners registered via addListener function
+	 * 
+	 * @var array
+	 * @see \Core\Router::addListener
+	 */
+	protected static $listeners = array();
+	
 	/**
 	 *
 	 * Get correct controller, using the argument array
@@ -66,13 +78,36 @@ abstract class Router {
 		return self::$fofHandler;
 	}
 	
+	/**
+	 * Initiates bootstraps and the config
+	 * 
+	 * @return null
+	 */
 	public static function Init() {
 		if (file_exists(BOILER_LOCATION."../config.php")) {
-			require BOILER_LOCATION."../config.php";
+			include BOILER_LOCATION."../config.php";
 			self::$settings = $settings;
 		}
+		
+		if (is_dir($bs = BOILER_LOCATION."application/bootstrap")) {
+			$dir = opendir($bs);
+			while (($file = readdir($dir)) !== false) {
+				if ($file == "." || $file == "..") {
+					continue;
+				}
+				include $bs."/".$file;
+			}
+		}
 	}
-
+	
+	
+	/**
+	 * Get the error page
+	 * 
+	 * @param int $error
+	 * 
+	 * @return null
+	 */
 	public static function getErrorPage($error) {
 		$obj = new self::$fofHandler[0];
 		call_user_func_array(array($obj, self::$fofHandler[1]), array($error));
@@ -102,5 +137,38 @@ abstract class Router {
 			include_once BOILER_LOCATION."application/helper/$helper.php";
 		}
 
+	}
+	
+	/**
+	 * Add a listener to the system
+	 * 
+	 * @param string $signal   Signal on which to activate
+	 * @param mixed  $callable A callable function
+	 * @param array  $param    Parameters to append after event params
+	 * 
+	 * @return null
+	 */
+	public static function addListener($signal, $callable, $param=array()) {
+		if (!isset(self::$listeners[$signal])) {
+			self::$listeners[$signal] = array();
+		}
+		self::$listeners[$signal] = array("callable"=>$callable, "param"=>$param);
+	}
+	
+	/**
+	 * Trigger an event in the system
+	 * 
+	 * @param string $signal Signal to trigger
+	 * @param array  $param  Event Arguments
+	 * 
+	 * @return null
+	 */
+	public static function triggerEvent($signal, $param=array()) {
+		if (!isset(self::$listeners[$signal])) {
+			return;
+		}
+		foreach (self::$listeners[$signal] as $call) {
+			call_user_func($call['callable'], array_merge($param, $call['param']));
+		}
 	}
 }
