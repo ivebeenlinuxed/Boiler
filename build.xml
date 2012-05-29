@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="My Project" default="build">
-
+	<property name="cmd.doxygen" value="/usr/bin/doxygen" />
 	<property name="db" value="urban_walks" />
 	<property name="db_user" value="urban-walks" />
 	<property name="db_password" value="urbanwalkspasswd123=" />
@@ -8,11 +8,11 @@
 	<property name="db_port" value="3306" />
 
 	<target name="build" depends="db-config" />
-	<target name="test" depends="phpunit,phpcpd,phpmd,phpcs,skelgen" />
+	<target name="test" depends="phpunit,phpcpd,phpmd,phpcs,skelgen,docs" />
 	<target name="configure" depends="db-config" />
 
 	<target name="docs">
-		<exec executable="doxygen" dir="${basedir}" failonerror="off">
+		<exec executable="${cmd.doxygen}" dir="${basedir}" failonerror="off">
 					<arg
 						line=" build/doxyfile.cfg" />
 				</exec>
