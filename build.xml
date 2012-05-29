@@ -8,7 +8,7 @@
 	<property name="db_port" value="3306" />
 
 	<target name="build" depends="db-config" />
-	<target name="test" depends="phpunit,phpcpd,phpmd,phpcs,skelgen,docs" />
+	<target name="test" depends="phpunit,phpcpd,phpmd,phpcs,skelgen" />
 	<target name="configure" depends="db-config" />
 
 	<target name="docs">
@@ -29,6 +29,7 @@
 		<mkdir dir="${basedir}/build/logs/docs/doxygen" />
 		<mkdir dir="${basedir}/build/logs/docs/clover" />
 		<chmod dir="${basedir}/build/logs" perm="0777" />
+		<chmod dir="${basedir}/build/logs/docs/doxygen" perm="0777" />
 	</target>
 
 	<!-- Configuration -->
