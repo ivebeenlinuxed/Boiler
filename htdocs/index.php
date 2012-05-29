@@ -34,7 +34,6 @@ function autoload($load) {
 
 spl_autoload_register("autoload");
 Core\Router::Init();
-require __DIR__."/../build/Selenium2PHPUnit/includes/prepend.php";
 
 if (!isset($_SERVER['no_run'])) {
 	if (isset($_SERVER['_']))
@@ -50,5 +49,3 @@ if (!isset($_SERVER['no_run'])) {
 	call_user_func_array(array($obj, $call[1]), $call[2]);
 }
 
-
-require __DIR__."/../build/Selenium2PHPUnit/includes/append.php";
