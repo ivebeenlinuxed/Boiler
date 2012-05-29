@@ -2,6 +2,8 @@
 /**
  * Dummy class to destinguish Boiler Exceptions (mainly used in Database lookups)
  * 
+ * PHP Version: 5.3
+ * 
  * @category Library
  * @package  Boiler
  * @author   ivebeenlinuxed <will@bcslichfield.com>

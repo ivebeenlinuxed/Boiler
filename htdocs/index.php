@@ -8,8 +8,9 @@ define("BOILER_HTDOCS", __DIR__);
 function autoload($load) {
 	$e = explode("\\", $load);
 	$class = array_pop($e);
-	foreach ($e as $key=>$data)
+	foreach ($e as $key=>$data) {
 		$e[$key] = strtolower($data);
+	}
 	if (count($e) > 0) {
 		if ($e[0] == "system") {
 			$e = array_slice($e, 1);

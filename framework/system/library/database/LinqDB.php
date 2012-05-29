@@ -12,12 +12,6 @@ class LinqDB extends \mysqli {
 
 
 	}
-	/*
-	 function query($qry) {
-	var_dump($qry);
-	var_dump(xdebug_get_function_stack());
-	}
-	*/
 
 	function Select($Obj, $name="t") {
 		return new LinqSelect($this, $Obj, $name);

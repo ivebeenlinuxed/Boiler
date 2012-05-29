@@ -104,8 +104,9 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		$select->setFilter($and);
 		$s = $select->Exec();
 		if (count($s) == 1) {
-			foreach ($s[0] as $Key=>$Data)
+			foreach ($s[0] as $Key=>$Data) {
 				$this->$Key = $Data;
+			}
 		} else {
 			throw new DBException("No object with ID '$Id'");
 		}
