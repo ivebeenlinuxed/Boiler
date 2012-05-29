@@ -11,7 +11,12 @@
 	<target name="test" depends="phpunit,phpcpd,phpmd,phpcs,skelgen" />
 	<target name="configure" depends="db-config" />
 
-
+	<target name="docs">
+		<exec executable="doxygen" dir="${basedir}" failonerror="off">
+					<arg
+						line=" build/doxyfile.cfg" />
+				</exec>
+	</target>
 	<!-- Housekeeping -->
 	<target name="clean">
 		<delete dir="${basedir}/build/logs" />
@@ -20,6 +25,9 @@
 
 	<target name="init" depends="clean">
 		<mkdir dir="${basedir}/build/logs" />
+		<mkdir dir="${basedir}/build/logs/docs" />
+		<mkdir dir="${basedir}/build/logs/docs/doxygen" />
+		<mkdir dir="${basedir}/build/logs/docs/clover" />
 		<chmod dir="${basedir}/build/logs" perm="0777" />
 	</target>
 
