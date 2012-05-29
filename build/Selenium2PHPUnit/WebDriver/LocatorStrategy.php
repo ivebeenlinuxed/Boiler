@@ -1,27 +1,27 @@
 <?php
 class LocatorStrategy {
     /**Returns an element whose class name contains the search value; compound class names are not permitted.*/
-    const className="class name";
+    const CLASS_NAME="class name";
 
     /**Returns an element matching a CSS selector.*/
-    const cssSelector="css selector";
+    const CSS_SELECTOR="css selector";
 
     /**Returns an element whose ID attribute matches the search value.*/
-    const id="id";
+    const ID="id";
 
     /**Returns an element whose NAME attribute matches the search value.*/
-    const name="name";
+    const NAME="name";
 
     /**Returns an anchor element whose visible text matches the search value.*/
-    const linkText="link text";
+    const LINK_TEXT="link text";
 
     /**Returns an anchor element whose visible text partially matches the search value.*/
-    const partialLinkText="partial link text";
+    const PARTIAL_LINK_TEXT="partial link text";
 
     /**Returns an element whose tag name matches the search value.*/
-    const tagName="tag name";
+    const TAG_NAME="tag name";
 
     /**Returns an element matching an XPath expression.*/
-    const xpath="xpath";
+    const XPATH="xpath";
 }
 ?>

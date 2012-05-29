@@ -62,7 +62,7 @@
 		<exec executable="phpcs" dir="${basedir}/framework"
 			output="${basedir}/build/logs/checkstyle.xml" failonerror="off">
 			<arg
-				line=" --report=checkstyle --tab-width=4 --standard=PEAR --extensions=php '${basedir}/framework'" />
+				line=" --standard='${basedir}/build/PHPCS' --report=checkstyle --tab-width=4 --standard=PEAR --extensions=php '${basedir}/framework'" />
 		</exec>
 	</target>
 

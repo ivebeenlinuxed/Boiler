@@ -67,13 +67,21 @@ class WebElement extends WebDriverBase {
         $this->preparePOST($session, "");
         $response = trim(curl_exec($session));
     }
-
+	
+    /**
+     * Get the inner text of the element
+     * @return string
+     */
     public function getText() {
         $request = $this->requestURL . "/text";
         $response = $this->execute_rest_request_GET($request);
         return $this->extractValueFromJsonResponse($response);
     }
-
+	
+    /**
+     * Get the tag name of the element
+     * @return string
+     */
     public function getName() {
         $request = $this->requestURL . "/name";
         $response = $this->execute_rest_request_GET($request);
@@ -82,6 +90,10 @@ class WebElement extends WebDriverBase {
 	
     /**
      * Get the value of a the given attribute of the element. 
+     * 
+     * @param string $attribute The name of the attribute to get the value of
+     * 
+     * @return string
      */
     public function getAttribute($attribute) {
     	$request = $this->requestURL . '/attribute/'.$attribute;
@@ -91,7 +103,9 @@ class WebElement extends WebDriverBase {
     }
 
     /**
-     * Determine if an OPTION element, or an INPUT element of type checkbox or radiobutton is currently selected.
+     * Determine if an OPTION element, or an INPUT element of type checkbox
+     * or radiobutton is currently selected.
+     * 
      * @return boolean Whether the element is selected.
      */
     public function isSelected() {

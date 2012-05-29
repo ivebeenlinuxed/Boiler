@@ -34,59 +34,60 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * @package    PHPUnit_Selenium
- * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
- * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @link       http://www.phpunit.de/
- * @since      File available since Release 1.2.6
+ * @package   PHPUnit_Selenium
+ * @author    Giorgio Sironi <giorgio.sironi@asp-poli.it>
+ * @copyright 2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @link      http://www.phpunit.de/
+ * @since     File available since Release 1.2.6
  */
 
 /**
- * TestSuite class for a set of tests from a single Testcase Class 
+ * TestSuite class for a set of tests from a single Testcase Class
  * executed with a particular browser.
  *
- * @package    PHPUnit_Selenium
- * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
- * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 1.2.6
- * @link       http://www.phpunit.de/
- * @since      Class available since Release 1.2.6
+ * @package   PHPUnit_Selenium
+ * @author    Giorgio Sironi <giorgio.sironi@asp-poli.it>
+ * @copyright 2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @version   Release: 1.2.6
+ * @link      http://www.phpunit.de/
+ * @since     Class available since Release 1.2.6
  */
 class Selenium2BrowserTestSuite extends PHPUnit_Framework_TestSuite
 {
-    /**
-     * Overriding the default: Selenium suites are always built from a TestCase class.
-     * @var boolean
-     */
-    protected $testCase = TRUE;
+	/**
+	 * Overriding the default: Selenium suites are always built from a TestCase class.
+	 * @var boolean
+	 */
+	protected $testCase = TRUE;
 
-    public function addTestMethod(ReflectionClass $class, ReflectionMethod $method)
-    {
-        return parent::addTestMethod($class, $method);
-    }
+	public function addTestMethod(ReflectionClass $class, ReflectionMethod $method)
+	{
+		return parent::addTestMethod($class, $method);
+	}
 
-    public static function fromClassAndBrowser($className, array $browser)
-    {
-        $browserSuite = new self();
-        $browserSuite->setName($className . ': ' . $browser['name']);
-        return $browserSuite;
-    }
+	public static function fromClassAndBrowser($className, array $browser)
+	{
+		$browserSuite = new self();
+		$browserSuite->setName($className . ': ' . $browser['name']);
+		return $browserSuite;
+	}
 
-    public function setupSpecificBrowser(array $browser)
-    {
-        $this->browserOnAllTests($this, $browser);
-    }
+	public function setupSpecificBrowser(array $browser)
+	{
+		$this->browserOnAllTests($this, $browser);
+	}
 
-    private function browserOnAllTests(PHPUnit_Framework_TestSuite $suite, array $browser)
-    {
-        foreach ($suite->tests() as $test) {
-            if ($test instanceof PHPUnit_Framework_TestSuite) {
-                $this->browserOnAllTests($test, $browser);
-            } else {
-                $test->setupSpecificBrowser($browser);
-            }
-        }
-    }
+	private function browserOnAllTests(PHPUnit_Framework_TestSuite $suite,
+			array $browser)
+	{
+		foreach ($suite->tests() as $test) {
+			if ($test instanceof PHPUnit_Framework_TestSuite) {
+				$this->browserOnAllTests($test, $browser);
+			} else {
+				$test->setupSpecificBrowser($browser);
+			}
+		}
+	}
 }

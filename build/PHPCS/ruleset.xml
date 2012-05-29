@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="ivebeenstandard by ivebeenlinuxed">
+	<description>A custom coding standard which (mainly) allows my braces
+		to be on the same line!</description>
+	<rule ref="PEAR">
+		<exclude name="PEAR.Classes.ClassDeclaration.OpenBraceNewLine" />
+		<exclude name="PEAR.Functions.FunctionDeclaration.BraceOnSameLine" />
+		<exclude
+			name="PEAR.ControlStructures.MultiLineCondition.CloseBracketNewLine" />
+		<exclude name="PEAR.Functions.FunctionDeclaration.NewlineBeforeOpenBrace" />
+		
+	</rule>
+
+	<rule ref="Generic.Files.LineLength">
+		<properties>
+			<!-- I got a big screen.... Why haven't you?! -->
+			<property name="lineLimit" value="200" />
+			<property name="absoluteLineLimit" value="300" />
+		</properties>
+	</rule>
+
+	<!-- Use Unix newlines -->
+	<rule ref="Generic.Files.LineEndings">
+		<properties>
+			<property name="eolChar" value="\n" />
+		</properties>
+	</rule>
+
+	<!-- This messgae is not required as spaces are allowed for alignment -->
+	<rule
+		ref="Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma">
+		<severity>0</severity>
+	</rule>
+
+	<!-- Use warnings for inline control structures -->
+	<rule ref="Generic.ControlStructures.InlineControlStructure">
+		<properties>
+			<property name="error" value="false" />
+		</properties>
+	</rule>
+</ruleset>

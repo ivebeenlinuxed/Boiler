@@ -34,24 +34,29 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * @package    PHPUnit_Selenium
- * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
- * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @link       http://www.phpunit.de/
- * @since      File available since Release 1.2.2
+ * 
+ *
+ * @package   PHPUnit_Selenium
+ * @author    Giorgio Sironi <giorgio.sironi@asp-poli.it>
+ * @copyright 2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @link      http://www.phpunit.de/
+ * @since     File available since Release 1.2.2
+ * 
  */
 
+// @codingStandardIgnoreFile
 /**
  * TestSuite class for Selenium 1 tests
  *
- * @package    PHPUnit_Selenium
- * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
- * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 1.2.6
- * @link       http://www.phpunit.de/
- * @since      Class available since Release 1.2.0
+ * @package   PHPUnit_Selenium
+ * @author    Giorgio Sironi <giorgio.sironi@asp-poli.it>
+ * @copyright 2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @version   Release: 1.2.6
+ * @link      http://www.phpunit.de/
+ * @since     Class available since Release 1.2.0
+ * 
  */
 class Selenium2TestSuite extends PHPUnit_Framework_TestSuite
 {

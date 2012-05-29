@@ -34,12 +34,12 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * @package    PHPUnit_Selenium
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2010-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @link       http://www.phpunit.de/
- * @since      File available since Release 1.0.0
+ * @package   PHPUnit_Selenium
+ * @author    Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @copyright 2010-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @link      http://www.phpunit.de/
+ * @since     File available since Release 1.0.0
  */
 
 abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
@@ -129,7 +129,7 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 	protected $coverageDomain = false;
 
 	/**
-	 * @param boolean
+	 * @param boolean $shareSession Whether session should be shared
 	 */
 	public static function shareSession($shareSession)
 	{
@@ -138,10 +138,13 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 
 
 	/**
-	 * @param  string $name
-	 * @param  array  $data
-	 * @param  string $dataName
-	 * @param  array  $browser
+	 * See overide
+	 * 
+	 * @param string $name Override
+	 * @param array  $data Override
+	 * @param string $dataName Override
+	 * 
+	 * @see PHPUnit_Framework_TestCase
 	 * @throws InvalidArgumentException
 	 */
 	public function __construct($name = NULL, array $data = array(), $dataName = '')
