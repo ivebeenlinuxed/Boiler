@@ -23,7 +23,7 @@
  * @see      \Core\DBObject
  *
  */
-class DBObject extends PHPUnit_Framework_TestCase {
+class DBObjectTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * Do some jiggery to the config
 	 * 
@@ -37,7 +37,7 @@ class DBObject extends PHPUnit_Framework_TestCase {
 		$settings['database']['server'] = 'localhost';
 		$settings['database']['port'] = '3306';
 		$settings['database']['db'] = 'jenkins';
-		\Router\Core::$settings = $settings;
+		\Core\Router::$settings = $settings;
 	}
 	
 	/**
