@@ -236,11 +236,11 @@ class StdLib {
 
 	public static function makeArray($obj) {
 		$arr = (array)$obj;
-		if(empty($arr)){
+		if (empty($arr)) {
 			$arr = "";
 		} else {
-			foreach($arr as $key=>$value){
-				if(!is_scalar($value)){
+			foreach ($arr as $key=>$value) {
+				if (!is_scalar($value)) {
 					$arr[$key] = makeArray($value);
 				}
 			}

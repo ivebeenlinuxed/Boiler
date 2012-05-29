@@ -20,6 +20,7 @@ use Library\Database\DBException;
  * Class containing LINQ like interface using late static bindings
  *
  * @abstract
+ * 
  */
 abstract class DBObject implements \Library\Database\LinqObject {
 	/**

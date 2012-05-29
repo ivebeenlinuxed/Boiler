@@ -1,9 +1,9 @@
 <?php
 namespace System\Core;
 /**
- *
  * Routes new requests to correct controller
- * @author ivebeenlinuxed
+ * 
+ * @author ivebeenlinuxed <will@bcslichfield.com>
  *
  */
 abstract class Router {

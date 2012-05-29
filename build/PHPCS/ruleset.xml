@@ -8,6 +8,8 @@
 		<exclude
 			name="PEAR.ControlStructures.MultiLineCondition.CloseBracketNewLine" />
 		<exclude name="PEAR.Functions.FunctionDeclaration.NewlineBeforeOpenBrace" />
+		<exclude name="PEAR.Functions.FunctionDeclaration.NewlineBeforeOpenBrace" />
+		<exclude name="PEAR.WhiteSpace.ScopeIndent.Incorrect" />
 		
 	</rule>
 

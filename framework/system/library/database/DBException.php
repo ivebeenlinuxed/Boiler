@@ -1,7 +1,7 @@
 <?php
 /**
  * 
- * @author star241
+ * @author ivebeenlinuxed <will@bcslichfield.com>
  *
  */
 namespace Library\Database;
