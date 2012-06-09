@@ -1,10 +1,21 @@
 <?php
+/**
+ * 
+ * 
+ */
+
 define("START_MEM", memory_get_usage());
 define("BOILER_LOCATION", __DIR__."/../framework/");
 define("BOILER_TMP", __DIR__."/../tmp/");
 define("BOILER_HTDOCS", __DIR__);
 
-
+/**
+ * Automatically loads the needed classes in the rest of the framework
+ * 
+ * @param string $load Class which is being loaded
+ * 
+ * @return null
+ */
 function autoload($load) {
 	$e = explode("\\", $load);
 	$class = array_pop($e);
