@@ -120,6 +120,10 @@ abstract class Router {
 		foreach ($variables as $key=>$data) {
 			$$key = $data;
 		}
+		
+		if (isset($variables['data'])) {
+			$data = $variables['data'];
+		}
 		include BOILER_LOCATION."application/view/$view.php";
 	}
 
@@ -129,6 +133,10 @@ abstract class Router {
 		}
 		foreach ($variables as $key=>$data) {
 			$$key = $data;
+		}
+		
+		if (isset($variables['data'])) {
+			$data = $variables['data'];
 		}
 		if (file_exists(BOILER_LOCATION."system/helper/$helper.php")) {
 			include_once BOILER_LOCATION."system/helper/$helper.php";
