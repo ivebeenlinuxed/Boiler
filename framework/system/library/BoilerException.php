@@ -24,6 +24,6 @@ namespace Library;
  * @link     http://www.bcslichfield.com
  *
  */
-class BoilerException extends Exception {
+class BoilerException extends \Exception {
 	
 }
