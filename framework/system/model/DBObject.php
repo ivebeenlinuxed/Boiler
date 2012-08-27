@@ -9,7 +9,7 @@ use Library\Database\DBException;
  * PHP inbuilt late static bindings to create an object out of the calling class.
  *
  * @author star241
- * @version $Id$
+ * @version $Id: 053a788e309ba1782d692cd2362b9d5c789a2d58 $
  * @since Sat 24 Jul 2010 23:46:26
  */
 
@@ -326,7 +326,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	public static function Search($expression, $field) {
 		$c = get_called_class();
 		$DB = $c::getDB();
-		if (strpos(" ", $expression) !== false) {
+		if (@strpos(" ", $expression) !== false) {
 			$a = explode(" ", $expression);
 		} else {
 			$a = array($expression);
@@ -337,6 +337,9 @@ abstract class DBObject implements \Library\Database\LinqObject {
 
 
 		foreach ($a as $s) {
+			if ($s == "") {
+				continue;
+			}
 			$and->like($field, "%".$s."%");
 		}
 

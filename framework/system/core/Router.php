@@ -1,6 +1,7 @@
 <?php
 namespace System\Core;
 /**
+ *
  * Routes new requests to correct controller
  * 
  * @category Core
@@ -88,16 +89,6 @@ abstract class Router {
 			include BOILER_LOCATION."../config.php";
 			self::$settings = $settings;
 		}
-		
-		if (is_dir($bs = BOILER_LOCATION."application/bootstrap")) {
-			$dir = opendir($bs);
-			while (($file = readdir($dir)) !== false) {
-				if ($file == "." || $file == "..") {
-					continue;
-				}
-				include $bs."/".$file;
-			}
-		}
 	}
 	
 	
@@ -113,8 +104,8 @@ abstract class Router {
 		call_user_func_array(array($obj, self::$fofHandler[1]), array($error));
 	}
 
-	public static function loadView($view, $variables=array()) {
-		if (strpos($view, ".") !== false) {
+	public static function loadView($routerViewObscuratedVariableToAvoidCollision, $variables=array()) {
+		if (strpos($routerViewObscuratedVariableToAvoidCollision, ".") !== false) {
 			throw new Exception("Cannot load views with dots in them");
 		}
 		foreach ($variables as $key=>$data) {
@@ -124,7 +115,7 @@ abstract class Router {
 		if (isset($variables['data'])) {
 			$data = $variables['data'];
 		}
-		include BOILER_LOCATION."application/view/$view.php";
+		include BOILER_LOCATION."application/view/$routerViewObscuratedVariableToAvoidCollision.php";
 	}
 
 	public static function loadHelper($helper, $variables=array()) {
