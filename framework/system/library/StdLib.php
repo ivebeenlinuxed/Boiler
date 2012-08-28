@@ -9,7 +9,19 @@ class StdLib {
 		return $text;
 	}
 	
-	function xss_clean($data)
+	/**
+	 * Time stamp beginning at 00:00
+	 * 
+	 * @var $timestamp int Original timestamp
+	 * 
+	 * @return int
+	 */
+	public static function timeonlystamp($timestamp) {
+		$d = new \DateTime("@".$timestamp);
+		return ($d->format("H")*1200)+($d->format("i")*60)+($d->format("s"));
+	}
+	
+	public static function xss_clean($data)
 	{
 		// Fix &entity\n;
 		$data = str_replace(array('&amp;','&lt;','&gt;'), array('&amp;amp;','&amp;lt;','&amp;gt;'), $data);

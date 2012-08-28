@@ -1,5 +1,7 @@
 <?php
 namespace System\Model;
+
+use Library\Database\DBDuplicationException;
 use Library\Database\DBException;
 
 /**
@@ -23,6 +25,10 @@ use Library\Database\DBException;
  * 
  */
 abstract class DBObject implements \Library\Database\LinqObject {
+	
+	public static $throwDuplicateException = true;
+	
+	
 	/**
 	 * @var int
 	 */
@@ -129,7 +135,28 @@ abstract class DBObject implements \Library\Database\LinqObject {
 				$this->$Key = $Data;
 			}
 		} else {
-			throw new DBException("No object with ID '$Id'");
+			throw new DBException("No '$c' object with ID '".json_encode($Id)."'");
+		}
+	}
+	
+	public function isEqual(DBObject $o) {
+		if (get_class($o) != get_called_class()) {
+			return false;
+		}
+		
+		if ($this->getUniqueIdentifier() != $o->getUniqueIdentifier()) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public static function Fetch($id) {
+		$c = get_called_class();
+		try {
+			return new $c($id);
+		} catch (DBException $e) {
+			return false;
 		}
 	}
 
@@ -175,6 +202,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	}
 
 	public function __toString() {
+		$c = get_called_class();
 		$p = $c::getPrimaryKey();
 		return $this->$p;
 	}
@@ -216,7 +244,25 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		$c = get_called_class();
 		$DB = $c::getDB();
 		$sQ = "TRUNCATE `".$c::getTable()."`";
-		$DB->query($sQ);
+		$st = $DB->prepare($sQ);
+		$st->execute();
+		if ($st->errno != 0) {
+			throw new DBException($st->error);
+		}
+		$st->close();
+		//$q = $DB->query($sQ);
+	}
+	
+	public static function DeleteAll() {
+		$c = get_called_class();
+		$DB = $c::getDB();
+		$sQ = "DELETE FROM `".$c::getTable()."`";
+		$st = $DB->prepare($sQ);
+		$st->execute();
+		if ($st->errno != 0) {
+			throw new DBException($st->error);
+		}
+		$st->close();
 	}
 
 	public static function Exists($id) {
@@ -406,7 +452,14 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		$DB->query($sQ);
 		$id = $DB->insert_id;
 		if ($DB->errno != 0) {
-			throw new DBException(self::getError($DB));
+			$e = self::getError($DB);
+			if (substr_compare($e, "Duplicate entry", 0)) {
+				if (self::$throwDuplicateException) {
+					throw new DBDuplicationException($e);
+				}
+			} else {
+				throw new DBException($e);
+			}
 		}
 
 		if ($id != null) {
@@ -469,6 +522,20 @@ abstract class DBObject implements \Library\Database\LinqObject {
 			throw new DBException(self::getError($DB));
 		}
 		return true;
+	}
+	
+	/**
+	 * Gets a string which acts as a unique identifier for the object
+	 *
+	 * @return string
+	 */
+	public function getUniqueIdentifier() {
+		$id = $this->getID();
+		$out = "";
+		foreach ($id as $i) {
+			$out .= "{$i}-";
+		}
+		return substr($out, 0, -1);
 	}
 }
 ?>
