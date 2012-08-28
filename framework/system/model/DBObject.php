@@ -139,6 +139,18 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		}
 	}
 	
+	public function getID() {
+		if (!is_array($key = $this->getPrimaryKey())) {
+			$key = array($key);
+		}
+	
+		$out = array();
+		foreach ($key as $k) {
+			$out[$k] = $this->$k;
+		}
+		return $out;
+	}
+	
 	public function isEqual(DBObject $o) {
 		if (get_class($o) != get_called_class()) {
 			return false;
