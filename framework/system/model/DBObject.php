@@ -465,7 +465,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		$id = $DB->insert_id;
 		if ($DB->errno != 0) {
 			$e = self::getError($DB);
-			if (substr_compare($e, "Duplicate entry", 0)) {
+			if (substr($e, 0, 15) == "Duplicate entry") {
 				if (self::$throwDuplicateException) {
 					throw new DBDuplicationException($e);
 				}
