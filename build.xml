@@ -10,8 +10,14 @@
 	<target name="build" depends="db-config" />
 	<target name="test" depends="phpunit,phpcpd,phpmd,phpcs,skelgen" />
 	<target name="configure" depends="db-config" />
-
-	<target name="docs">
+	
+	<target name="models" depends="db-config">
+			<exec executable="php" dir="${basedir}/build/generation" failonerror="off">
+				<arg line=" 'models.php'" />
+			</exec>
+	</target>
+	
+	<target name="docs" depends="init">
 		<exec executable="${cmd.doxygen}" dir="${basedir}" failonerror="off">
 					<arg
 						line=" build/doxyfile.cfg" />
