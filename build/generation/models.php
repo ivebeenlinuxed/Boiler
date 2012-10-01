@@ -1,75 +1,19 @@
 <?php
 $_SERVER['no_run'] = true;
-require "../htdocs/index.php";
+require "../../htdocs/index.php";
+require "common.php";
 
 
-function getClassName($table) {
-	$name = explode("_", $table);
-	$className = "";
-	foreach ($name as $n) {
-		$className .= ucfirst($n);
-	}
-	return $className;
-}
-
-function getClassNamePlural($table) {
-	$name = explode("_", $table);
-	$className = "";
-	foreach ($name as $c=>$n) {
-		if ($c == count($name)-1) {
-			$n = \System\Library\Lexical::pluralize($n);
-		}	
-		$className .= ucfirst($n);
-		
-	}
-	return $className;
-}
 
 
-$d = new mysqli(\Core\Router::$settings['database']['server'], \Core\Router::$settings['database']['user'], \Core\Router::$settings['database']['passwd'], \Core\Router::$settings['database']['db'], \Core\Router::$settings['database']['port']);
-$q = $d->query("SHOW TABLES");
-$models = array();
 
-while ($data = $q->fetch_array()) {
-	$models[$data[0]] = array("columns"=>array(), "multi"=>array(), "single"=>array(), "key"=>array());
-}
+$models = getModels($d);
+
 
 foreach ($models as $table=>$model) {
-	$q = $d->query("SHOW COLUMNS IN $table");
-	while ($data = $q->fetch_assoc()) {
-		$models[$table]['columns'][$data['Field']] = $data['Type'];
-		if ($data['Key'] == "PRI") {
-			$models[$table]['key'][] = $data['Field'];
-		}
-	}
-}
-
-foreach ($models as $table=>$model) {
-	$sQuery = <<<EOF
-SELECT i.TABLE_NAME, k.COLUMN_NAME, i.CONSTRAINT_TYPE, i.CONSTRAINT_NAME, k.REFERENCED_TABLE_NAME, k.REFERENCED_COLUMN_NAME
-FROM information_schema.TABLE_CONSTRAINTS i
-LEFT JOIN information_schema.KEY_COLUMN_USAGE k ON i.CONSTRAINT_NAME = k.CONSTRAINT_NAME
-WHERE i.CONSTRAINT_TYPE = 'FOREIGN KEY'
-AND i.TABLE_SCHEMA = DATABASE()
-AND i.TABLE_NAME = '$table'
-EOF;
-	$q = $d->query($sQuery);
-	while ($data = $q->fetch_assoc()) {
-		$models[$data['TABLE_NAME']]['multi'][$data['CONSTRAINT_NAME']] = array($data['COLUMN_NAME'], $data['REFERENCED_TABLE_NAME'], $data['REFERENCED_COLUMN_NAME']);
-		$models[$data['REFERENCED_TABLE_NAME']]['single'][$data['CONSTRAINT_NAME']] = array($data['REFERENCED_COLUMN_NAME'], $data['TABLE_NAME'], $data['COLUMN_NAME']);
-	}
-}
-
-foreach ($models as $table=>$model) {
-	if (count($model['multi']) == 2 && count($model['columns']) == 2) {
-		$models[$table]['link_table'] = true;
-	} else {
-		$models[$table]['link_table'] = false;
-	}
-}
-
-foreach ($models as $table=>$model) {
+	$f = "../../framework/system/model/".($c = getClassName($table)).".php";
 	
+	echo "BUILDING $f\r\n";
 	$file = <<<EOF
 <?php
 namespace System\Model;
@@ -78,6 +22,8 @@ namespace System\Model;
 EOF;
 	$className = getClassName($table);
 	$pkey = '"'.implode('","', $models[$table]['key']).'"';
+	$columnArray = getPHPArray(array_keys($models[$table]['columns']));
+	
 	$file .= <<<EOF
 class $className extends \Model\DBObject {
 EOF;
@@ -91,19 +37,28 @@ EOF;
 		} else {
 			$type = "unknown_type";
 		}
+		
 		$file .= <<<EOF
 
 	
 	/**
 	* $desc
 	* 
-	* @var \$$column $type
+	* @var $type \$$column 
 	*/
 	public \$$column;
 EOF;
 	}
 	$file .= <<<EOF
-
+	/**
+	 * Lists all the columns in the database
+	 *
+	 * @return array
+	 */
+	public static function getDBColumns() {
+		return $columnArray;
+	}
+	
 	/**
 	 * Gets the table name (always returns "$table")
 	 * 
@@ -124,12 +79,26 @@ EOF;
 		return array($pkey);
 	}
 EOF;
+	
+	$addArgs = array();
+	foreach ($models[$table]['key'] as $addArgs) {
+		
+	}
+	
+	$file .= <<<EOF
+	public static function Add() {
+		
+	}
+EOF;
+	
+	
 	foreach ($models[$table]['multi'] as $col=>$key) {
 		if ($key[2] != $models[$key[1]]['key'][0] || count($models[$key[1]]['key']) != 1) {
 			continue;
 		}
 		$className = getClassName($key[1]);
 		$selfName = getClassName($table);
+		echo " - get{$className}(): \\Model\\$className(\$this->$key[0])\r\n";
 		$file .= <<<EOF
 
 	/**
@@ -142,12 +111,13 @@ EOF;
 	}
 EOF;
 		if ($model['link_table']) {
-			foreach ($model['multi'] as $column=>$data) {
-				if ($data[1] != $table) {
-					$linkTable = getClassName($data[1]);
-					break;
-				}
-			}
+			$av = array_values($model['multi']);
+			$linkTable = ($av[0][0] == $key[1])? $av[1][1] : $av[0][1];
+			$linkTable = getClassName($linkTable);
+			$linkColumn = ($av[0][0] == $key[1])? $av[1][0] : $av[0][0];
+			echo " - getBy$className($className \$class): \\Model\\$linkTable(\$c->{$key[0]})[]\r\n";
+			//var_dump($data);
+			//die;
 			$file .= <<<EOF
 			
 	/**
@@ -158,12 +128,13 @@ EOF;
 	public static function getBy$className($className \$class) {
 		\$out = array();
 		foreach (self::getByAttribute("{$key[0]}", \$class->{$key[2]}) as \$c) {
-			\$out[] = new \\Model\\$linkTable(\$c->{$key[0]});
+			\$out[] = new \\Model\\$linkTable(\$c->{$linkColumn});
 		}
 		return \$out;
 	}
 EOF;
 		} else {
+			echo " - getBy$className($className \$class): self()\r\n";
 			$file .= <<<EOF
 			
 	/**
@@ -195,11 +166,12 @@ EOF;
 		}
 		
 		$classNamePlural = getClassNamePlural($className);
+		echo " - get{$classNamePlural}(): \\Model\\{$origClassName}()\r\n";
 		$file .= <<<EOF
 
 
-	public static function get{$classNamePlural}() {
-		return \Model\{$origClassName}::getBy{$selfName}(\$this);
+	public function get{$classNamePlural}() {
+		return \\Model\\{$origClassName}::getBy{$selfName}(\$this);
 	}
 	
 EOF;
@@ -209,9 +181,8 @@ EOF;
 
 }
 EOF;
-	file_put_contents("../framework/system/model/".($c = getClassName($table)).".php", $file);
-	
-	if (!file_exists($f = "../framework/application/model/".getClassName($table).".php")) {
+	file_put_contents($f = "../../framework/system/model/".($c = getClassName($table)).".php", $file);
+	if (!file_exists($f = "../../framework/application/model/".getClassName($table).".php")) {
 		
 		$file = <<<EOF
 <?php
@@ -220,7 +191,7 @@ namespace Model;
 class $c extends \\System\\Model\\{$c} {
 }
 EOF;
-		echo "NOT EXIST $f\r\n";
+		echo "CREATING $f\r\n";
 		file_put_contents($f, $file);
 	} else {
 		echo "EXISTS $f\r\n";

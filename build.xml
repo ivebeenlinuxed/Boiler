@@ -17,6 +17,12 @@
 			</exec>
 	</target>
 	
+	<target name="models-clean" depends="db-config">
+				<exec executable="php" dir="${basedir}/build/generation" failonerror="off">
+					<arg line=" 'models-clean.php'" />
+				</exec>
+		</target>
+	
 	<target name="docs" depends="init">
 		<exec executable="${cmd.doxygen}" dir="${basedir}" failonerror="off">
 					<arg
@@ -28,6 +34,7 @@
 		<delete dir="${basedir}/build/logs" />
 		<delete dir="${basedir}/tests/framework" />
 	</target>
+	
 
 	<target name="init" depends="clean">
 		<mkdir dir="${basedir}/build/logs" />
@@ -48,14 +55,14 @@
 
 	<target name="db-schema" depends="db-config">
 		<exec executable="php" dir="${basedir}/build" failonerror="off">
-			<arg line=" 'schema.php'" />
+			<arg line=" 'schema_load.php'" />
 		</exec>
 	</target>
 
 	<!-- Test Data -->
 	<target name="db-testdata" depends="db-schema">
 		<exec executable="php" dir="${basedir}/build" failonerror="off">
-			<arg line=" 'testdata.php'" />
+			<arg line=" 'testdata_load.php'" />
 		</exec>
 	</target>
 
