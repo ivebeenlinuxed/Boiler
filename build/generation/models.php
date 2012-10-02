@@ -1,11 +1,11 @@
 <?php
-require "common.php";
+require_once "common.php";
 
 
 
 
 
-$models = getModels($d);
+$models = getModels();
 
 
 foreach ($models as $table=>$model) {
