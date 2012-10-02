@@ -54,7 +54,7 @@ EOF;
 	 * @return null
 	 */
 	public function testTableCreate() {
-		$q = $this->db->query("SHOW COLUMNS IN `test`");
+ 		$q = $this->db->query("SHOW COLUMNS IN `user`");
 		$this->assertEquals(3, $q->num_rows);
 	}
 	
@@ -73,6 +73,7 @@ EOF;
 	/**
 	 * Test Creation Logic
 	 *
+	 * @covers System\Model\DBObject::Create
 	 * @depends testGeneration
 	 * @return null
 	 */
@@ -87,7 +88,6 @@ EOF;
 	 * Tests that foreign keys between tables work properly
 	 * 
 	 * @depends testCreate
-	 * 
 	 * @return null
 	 */
 	public function foreignKeys() {
