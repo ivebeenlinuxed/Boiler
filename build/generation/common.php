@@ -1,4 +1,9 @@
 <?php
+if (!defined("BOILER_LOCATION")) {
+	$_SERVER['no_run'] = true;
+	require "../../htdocs/index.php";
+}
+
 $d = new mysqli(\Core\Router::$settings['database']['server'], \Core\Router::$settings['database']['user'], \Core\Router::$settings['database']['passwd'], \Core\Router::$settings['database']['db'], \Core\Router::$settings['database']['port']);
 
 function getPHPArray($array) {

@@ -1,6 +1,4 @@
 <?php
-$_SERVER['no_run'] = true;
-require "../../htdocs/index.php";
 require "common.php";
 
 
@@ -84,13 +82,13 @@ EOF;
 	foreach ($models[$table]['key'] as $addArgs) {
 		
 	}
-	
+	/*
 	$file .= <<<EOF
 	public static function Add() {
 		
 	}
 EOF;
-	
+	*/
 	
 	foreach ($models[$table]['multi'] as $col=>$key) {
 		if ($key[2] != $models[$key[1]]['key'][0] || count($models[$key[1]]['key']) != 1) {
@@ -181,8 +179,8 @@ EOF;
 
 }
 EOF;
-	file_put_contents($f = "../../framework/system/model/".($c = getClassName($table)).".php", $file);
-	if (!file_exists($f = "../../framework/application/model/".getClassName($table).".php")) {
+	file_put_contents($f = __DIR__."/../../framework/system/model/".($c = getClassName($table)).".php", $file);
+	if (!file_exists($f = __DIR__."/../../framework/application/model/".getClassName($table).".php")) {
 		
 		$file = <<<EOF
 <?php
