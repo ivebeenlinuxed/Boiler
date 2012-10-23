@@ -3,7 +3,7 @@ $_SERVER['no_run'] = true;
 require "../../htdocs/index.php";
 require "common.php";
 
-$models = getModels($d);
+$models = getModels();
 
 $cn = array("DBObject.php");
 foreach ($models as $table=>$model) {
@@ -19,5 +19,6 @@ while (($f = readdir($dir)) !== false) {
 		echo "FILE $f: ACTIVE\r\n";
 	} else {
 		echo "FILE $f: INACTIVE\r\n";
+		unlink("../../framework/system/model/".$f);
 	}
 }
