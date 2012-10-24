@@ -10,7 +10,8 @@
 		<exclude name="PEAR.Functions.FunctionDeclaration.NewlineBeforeOpenBrace" />
 		<exclude name="PEAR.Functions.FunctionDeclaration.NewlineBeforeOpenBrace" />
 		<exclude name="PEAR.WhiteSpace.ScopeIndent.Incorrect" />
-		
+		<exclude name="PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore" />
+		<exclude name="PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore" />
 	</rule>
 
 	<rule ref="Generic.Files.LineLength">

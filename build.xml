@@ -8,7 +8,7 @@
 	<property name="db_port" value="3306" />
 
 	<target name="build" depends="db-config" />
-	<target name="test" depends="phpunit,phpcpd,phpmd,phpcs,skelgen" />
+	<target name="test" depends="docs,phpunit,phpcpd,phpmd,phpcs,skelgen" />
 	<target name="configure" depends="db-config" />
 	
 	<target name="models" depends="db-config">
@@ -84,7 +84,7 @@
 		<exec executable="phpcs" dir="${basedir}/framework"
 			output="${basedir}/build/logs/checkstyle.xml" failonerror="off">
 			<arg
-				line=" --standard='${basedir}/build/PHPCS' --report=checkstyle --tab-width=4 --standard=PEAR --extensions=php '${basedir}/framework'" />
+				line=" --standard='${basedir}/build/PHPCS' --report=checkstyle --tab-width=4 --extensions=php '${basedir}/framework'" />
 		</exec>
 	</target>
 
@@ -98,7 +98,7 @@
 	<target name="phpunit" depends="init,db-testdata,skelgen">
 		<exec executable="phpunit" dir="${basedir}" failonerror="off">
 			<arg
-				line=" --bootstrap '${basedir}/build/phpunit.php' --log-junit '${basedir}/build/logs/phpunit.xml' --coverage-clover '${basedir}/build/logs/clover.xml' --coverage-html '${basedir}/build/logs/coverage' '${basedir}/tests'" />
+				line=" --bootstrap '${basedir}/build/phpunit.php' --log-junit '${basedir}/build/logs/phpunit.xml' --coverage-clover '${basedir}/build/logs/clover.xml' --coverage-html '${basedir}/build/logs/coverage' '${basedir}/tests/'" />
 		</exec>
 	</target>
 </project>

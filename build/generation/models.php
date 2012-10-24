@@ -7,7 +7,6 @@ require_once "common.php";
 
 $models = getModels();
 
-
 foreach ($models as $table=>$model) {
 	$f = "../../framework/system/model/".($c = getClassName($table)).".php";
 	
@@ -48,6 +47,7 @@ EOF;
 EOF;
 	}
 	$file .= <<<EOF
+	
 	/**
 	 * Lists all the columns in the database
 	 *
@@ -60,7 +60,7 @@ EOF;
 	/**
 	 * Gets the table name (always returns "$table")
 	 * 
-	 * @var \$read boolean changes the table name if a database view is provided for reading, rather than a table
+	 * @var boolean \$read changes the table name if a database view is provided for reading, rather than a table
 	 * 
 	 * @return string
 	 */
@@ -91,14 +91,15 @@ EOF;
 	*/
 	
 	foreach ($models[$table]['multi'] as $col=>$key) {
-		if ($key[2] != $models[$key[1]]['key'][0] || count($models[$key[1]]['key']) != 1) {
-			continue;
-		}
+		//if ($key[2] != $models[$key[1]]['key'][0] || count($models[$key[1]]['key']) != 1) {
+		//	continue;
+		//}
 		$className = getClassName($key[1]);
 		$selfName = getClassName($table);
 		echo " - get{$className}(): \\Model\\$className(\$this->$key[0])\r\n";
 		$file .= <<<EOF
 
+		
 	/**
 	 * Gets all $className associated with this object
 	 * 
@@ -108,37 +109,16 @@ EOF;
 		return new \\Model\\$className(\$this->$key[0]);
 	}
 EOF;
-		if ($model['link_table']) {
-			$av = array_values($model['multi']);
-			$linkTable = ($av[0][0] == $key[1])? $av[1][1] : $av[0][1];
-			$linkTable = getClassName($linkTable);
-			$linkColumn = ($av[0][0] == $key[1])? $av[1][0] : $av[0][0];
-			echo " - getBy$className($className \$class): \\Model\\$linkTable(\$c->{$key[0]})[]\r\n";
-			//var_dump($data);
-			//die;
-			$file .= <<<EOF
+		
+		
+		echo " - getBy$className($className \$class): self()\r\n";
+		$file .= <<<EOF
 			
-	/**
-	 * Extrapolation of the $className <-> $linkTable via this link table
-	 * 
-	 * @return array
-	 */
-	public static function getBy$className($className \$class) {
-		\$out = array();
-		foreach (self::getByAttribute("{$key[0]}", \$class->{$key[2]}) as \$c) {
-			\$out[] = new \\Model\\$linkTable(\$c->{$linkColumn});
-		}
-		return \$out;
-	}
-EOF;
-		} else {
-			echo " - getBy$className($className \$class): self()\r\n";
-			$file .= <<<EOF
-			
+		
 	/**
 	 * Gets all objects relating to $className
 	 * 
-	 * @var \$class \Model\$className
+	 * @var \$class \Model\$className Get objects relating to this class
 	 * 
 	 * @return array
 	 */		
@@ -147,7 +127,6 @@ EOF;
 		return \$c::getByAttribute("{$key[0]}", \$class->{$key[2]});
 	}
 EOF;
-		}
 	}
 	
 	foreach ($models[$table]['single'] as $col=>$key) {

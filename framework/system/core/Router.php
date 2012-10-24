@@ -117,6 +117,15 @@ abstract class Router {
 		}
 		include BOILER_LOCATION."application/view/$routerViewObscuratedVariableToAvoidCollision.php";
 	}
+	
+	public static function getView($view, $variables=array(), $system=false) {
+		$bufferASystemObscuratedVariableToAvoidCollision = ob_get_clean();
+		ob_start();
+		self::loadView($view, $variables, $system);
+		$bufferBSystemObscuratedVariableToAvoidCollision = ob_get_clean();
+		echo $bufferASystemObscuratedVariableToAvoidCollision;
+		return $bufferBSystemObscuratedVariableToAvoidCollision;
+	}
 
 	public static function loadHelper($helper, $variables=array()) {
 		if (strpos($view, ".") !== false) {
