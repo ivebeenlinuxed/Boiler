@@ -35,7 +35,6 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	protected $ID;
 
 	/**
-	 * @static
 	 * @var MySQLResource
 	 */
 	private static $masterDB;
@@ -45,7 +44,6 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	 *
 	 * Get table from child class
 	 *
-	 * @static
 	 * @return string
 	 */
 	//public static abstract function getTable($read=false);
@@ -54,7 +52,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	 * getPrimaryKey
 	 *
 	 * Get primary key from child class
-	 * @static
+	 * 
 	 * @return string
 	 */
 	public static abstract function getPrimaryKey();
@@ -212,12 +210,19 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	public static function getByAttribute($name, $value, $order=null, $start=null, $limit=null) {
 		return self::getByAttributes(array($name=>$value), $order, $start, $limit);
 	}
-
+	
+	/**
+	 * Returns primary key as string
+	 * 
+	 * @return null
+	 */
 	public function __toString() {
 		$c = get_called_class();
 		$p = $c::getPrimaryKey();
 		return $this->$p;
 	}
+	
+	
 	public static function getByAttributes($array=null, $order=null, $start=null, $limit=null) {
 		$class=get_called_class();
 		$a = self::getIDByAttributes($array, $order, $start, $limit);
@@ -247,11 +252,18 @@ abstract class DBObject implements \Library\Database\LinqObject {
 
 		$this->DB->query($sQ);
 	}
-
+	
+	/**
+	 * Deletes the record
+	 */
 	public function Delete() {
 		$this->DBDelete();
 	}
 
+	/**
+	 * Performs a TRUNCATE
+	 * @throws DBException
+	 */
 	public static function Truncate() {
 		$c = get_called_class();
 		$DB = $c::getDB();
@@ -265,6 +277,13 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		//$q = $DB->query($sQ);
 	}
 	
+	/**
+	 * Performs "DELETE FROM `table`" query, useful for Foreign keys where TRUCNATE does not work, but is less efficient than TRUNCATE
+	 * 
+	 * @throws DBException
+	 * 
+	 * @return null
+	 */
 	public static function DeleteAll() {
 		$c = get_called_class();
 		$DB = $c::getDB();
@@ -277,6 +296,16 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		$st->close();
 	}
 
+	/**
+	 * Checks if a record exists
+	 * 
+	 * @param mixed $id The ID of the record
+	 * 
+	 * @throws DBException
+	 * @throws \Library\Database\DBException
+	 * 
+	 * @return boolean
+	 */
 	public static function Exists($id) {
 		$c = get_called_class();
 		$p = $c::getPrimaryKey();
@@ -291,7 +320,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 
 
 		if (count($id) != count($p)) {
-			throw new DBException("Primary key is the wrong length");
+			throw new \Library\Database\DBException("Primary key is the wrong length");
 		}
 		$select = $db->Select($c);
 		$select->addCount("c");
@@ -353,7 +382,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		$select->setFilter($and);
 		$q = $select->Exec();
 		if ($DB->errno != 0) {
-			throw new DBException(self::getError($DB));
+			throw new \Library\Database\DBException(self::getError($DB));
 		}
 		$p = $c::getPrimaryKey();
 
@@ -380,7 +409,16 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	}
 
 
-
+	/**
+	 * Searches the database using automatically inserted wildcards
+	 * 
+	 * @param string          $expression Expression to look for
+	 * @param string|string[] $field      The fields to search
+	 * 
+	 * @throws DBException
+	 * 
+	 * @return multitype:Ambigous <unknown, string> The Primary Key
+	 */
 	public static function Search($expression, $field) {
 		$c = get_called_class();
 		$DB = $c::getDB();
@@ -429,11 +467,30 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		}
 		return $out;
 	}
-
+	
+	/**
+	 * Gets all the records from a table
+	 * 
+	 * @param string $order
+	 * @param int    $start
+	 * @param int    $limit
+	 * 
+	 * @return self
+	 */
 	public static function getAll($order=null, $start=null, $limit=null) {
 		return self::getByAttributes(null, $order, $start, $limit);
 	}
-
+	
+	/**
+	 * Creates a new record in the MySQL database and returns in the Primary Key
+	 * 
+	 * @param string[] $Array The values of the record
+	 * 
+	 * @throws DBDuplicationException
+	 * @throws DBException
+	 * 
+	 * @return string
+	 */
 	public static function getIdByCreate($Array) {
 
 		$c=get_called_class();
@@ -487,7 +544,12 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		return $out;
 	}
 
-
+	/**
+	 * Creates a new record in the MySQL and returns result as an Object
+	 * 
+	 * @param string[] $Array
+	 * @return self
+	 */
 	public static function Create($Array) {
 
 		$c = get_called_class();
@@ -495,7 +557,13 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		return new $c($id);
 
 	}
-
+	
+	/**
+	 * Gets the error of the database context
+	 * 
+	 * @param \MySQLi $DB
+	 * @throws Exception
+	 */
 	protected function getError($DB = "") {
 		if (!isset($this) && $DB == "") {
 			throw new Exception("No database in context");
@@ -508,11 +576,32 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		}
 	}
 
-	public function removeByAttribute($field, $value, $start=null, $limit=null) {
+	/**
+	 * Deletes records
+	 * 
+	 * @param string $field Field to search for
+	 * @param string $value Value of the field
+	 * @param int    $start Record to start delete
+	 * @param int    $limit Record to end delete
+	 * 
+	 * @return null
+	 */
+	public static function removeByAttribute($field, $value, $start=null, $limit=null) {
 		self::removeByAttributes(array($field=>$value), $start, $limit);
 	}
-
-	public function removeByAttributes($array, $start=null, $limit=null) {
+	
+	/**
+	 * Deletes records using an associative array as search parameter
+	 * 
+	 * @param string[] $array Associative array of search parameters
+	 * @param int      $start Start at this record of search
+	 * @param int      $limit End and this record
+	 * 
+	 * @throws DBException
+	 * 
+	 * @return null
+	 */
+	public static function removeByAttributes($array, $start=null, $limit=null) {
 		$c=get_called_class();
 		$DB = $c::getDB();
 		$sQ = "DELETE FROM `".$c::getTable(false)."`";
