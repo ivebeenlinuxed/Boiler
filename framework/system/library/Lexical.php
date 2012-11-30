@@ -90,5 +90,27 @@ class Lexical
 
 		return $string;
 	}
+	
+	public static function getClassName($table) {
+		$name = explode("_", $table);
+		$className = "";
+		foreach ($name as $n) {
+			$className .= ucfirst($n);
+		}
+		return $className;
+	}
+	
+	public static function getClassNamePlural($table) {
+		$name = explode("_", $table);
+		$className = "";
+		foreach ($name as $c=>$n) {
+			if ($c == count($name)-1) {
+				$n = \System\Library\Lexical::pluralize($n);
+			}
+			$className .= ucfirst($n);
+	
+		}
+		return $className;
+	}
 
 }

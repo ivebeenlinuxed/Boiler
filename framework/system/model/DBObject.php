@@ -22,13 +22,13 @@ use Library\Database\DBException;
  * Class containing LINQ like interface using late static bindings
  *
  * @abstract
- *
+ * 
  */
 abstract class DBObject implements \Library\Database\LinqObject {
-
+	
 	public static $throwDuplicateException = true;
-
-
+	
+	
 	/**
 	 * @var int
 	 */
@@ -52,32 +52,32 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	 * getPrimaryKey
 	 *
 	 * Get primary key from child class
-	 *
+	 * 
 	 * @return string
 	 */
 	public static abstract function getPrimaryKey();
 
 	/**
 	 * Returns the LinqDB associated with this object (gets the mysqli database)
-	 *
+	 * 
 	 * @see \Library\Database\LinqDB
 	 * @return \Library\Database\LinqDB;
 	 */
 	public static abstract function getDB();
 
 	public $DB;
-
+	
 	/**
 	 * Used internally for the table name
-	 *
+	 * 
 	 * @deprecated
 	 * @var string
 	 */
 	private $Table;
-
+	
 	/**
 	 * Used interanally for primary key
-	 *
+	 * 
 	 * @deprecated
 	 * @var string
 	 */
@@ -88,11 +88,11 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	 *
 	 * Create new object using primary key. Dynamically creates the database
 	 * turples into properties
-	 *
+	 * 
 	 * If this key is a concatinated key an associative array may be used to pull the selected row
 	 *
 	 * @param string $Id The ID (from Primary Key columns) of the object to pull.
-	 *
+	 * 
 	 * @return void
 	 */
 	public function __construct($Id) {
@@ -136,31 +136,31 @@ abstract class DBObject implements \Library\Database\LinqObject {
 			throw new DBException("No '$c' object with ID '".json_encode($Id)."'");
 		}
 	}
-
+	
 	public function getID() {
 		if (!is_array($key = $this->getPrimaryKey())) {
 			$key = array($key);
 		}
-
+	
 		$out = array();
 		foreach ($key as $k) {
 			$out[$k] = $this->$k;
 		}
 		return $out;
 	}
-
+	
 	public function isEqual(DBObject $o) {
 		if (get_class($o) != get_called_class()) {
 			return false;
 		}
-
+		
 		if ($this->getUniqueIdentifier() != $o->getUniqueIdentifier()) {
 			return false;
 		}
-
+		
 		return true;
 	}
-
+	
 	public static function Fetch($id) {
 		$c = get_called_class();
 		try {
@@ -177,7 +177,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	 *
 	 * @param string $name  Name of field
 	 * @param mixed  $value Value of field
-	 *
+	 * 
 	 * @return void
 	 */
 	public function setAttribute($name, $value) {
@@ -210,10 +210,10 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	public static function getByAttribute($name, $value, $order=null, $start=null, $limit=null) {
 		return self::getByAttributes(array($name=>$value), $order, $start, $limit);
 	}
-
+	
 	/**
 	 * Returns primary key as string
-	 *
+	 * 
 	 * @return null
 	 */
 	public function __toString() {
@@ -221,8 +221,8 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		$p = $c::getPrimaryKey();
 		return $this->$p;
 	}
-
-
+	
+	
 	public static function getByAttributes($array=null, $order=null, $start=null, $limit=null) {
 		$class=get_called_class();
 		$a = self::getIDByAttributes($array, $order, $start, $limit);
@@ -252,7 +252,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 
 		$this->DB->query($sQ);
 	}
-
+	
 	/**
 	 * Deletes the record
 	 */
@@ -276,12 +276,12 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		$st->close();
 		//$q = $DB->query($sQ);
 	}
-
+	
 	/**
 	 * Performs "DELETE FROM `table`" query, useful for Foreign keys where TRUCNATE does not work, but is less efficient than TRUNCATE
-	 *
+	 * 
 	 * @throws DBException
-	 *
+	 * 
 	 * @return null
 	 */
 	public static function DeleteAll() {
@@ -298,12 +298,12 @@ abstract class DBObject implements \Library\Database\LinqObject {
 
 	/**
 	 * Checks if a record exists
-	 *
+	 * 
 	 * @param mixed $id The ID of the record
-	 *
+	 * 
 	 * @throws DBException
 	 * @throws \Library\Database\DBException
-	 *
+	 * 
 	 * @return boolean
 	 */
 	public static function Exists($id) {
@@ -355,11 +355,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 
 		if (isset($array)) {
 			foreach ($array as $Key=>$Data) {
-				if ($Data === false) {
-					$and->isnull($Key);
-				} else {
-					$and->eq($Key, $Data);
-				}
+				$and->eq($Key, $Data);
 			}
 		}
 		if (isset($order)) {
@@ -415,12 +411,12 @@ abstract class DBObject implements \Library\Database\LinqObject {
 
 	/**
 	 * Searches the database using automatically inserted wildcards
-	 *
+	 * 
 	 * @param string          $expression Expression to look for
 	 * @param string|string[] $field      The fields to search
-	 *
+	 * 
 	 * @throws DBException
-	 *
+	 * 
 	 * @return multitype:Ambigous <unknown, string> The Primary Key
 	 */
 	public static function Search($expression, $field) {
@@ -471,28 +467,28 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		}
 		return $out;
 	}
-
+	
 	/**
 	 * Gets all the records from a table
-	 *
+	 * 
 	 * @param string $order
 	 * @param int    $start
 	 * @param int    $limit
-	 *
+	 * 
 	 * @return self
 	 */
 	public static function getAll($order=null, $start=null, $limit=null) {
 		return self::getByAttributes(null, $order, $start, $limit);
 	}
-
+	
 	/**
 	 * Creates a new record in the MySQL database and returns in the Primary Key
-	 *
+	 * 
 	 * @param string[] $Array The values of the record
-	 *
+	 * 
 	 * @throws DBDuplicationException
 	 * @throws DBException
-	 *
+	 * 
 	 * @return string
 	 */
 	public static function getIdByCreate($Array) {
@@ -510,13 +506,9 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		foreach ($Array as $Key=>$Data) {
 			$sQ .= "`".$DB->escape_string($Key)."`, ";
 		}
-		
-		if (count($Array) > 0) {
-			$sQ = substr($sQ, 0, -2);
-		}
+		$sQ = substr($sQ, 0, -2);
 		$sQ .= ") VALUES (";
-		
-		
+
 		foreach ($Array as $Key=>$Data) {
 			if ($Data !== false) {
 				$sQ .= "'".$DB->escape_string($Data)."', ";
@@ -524,13 +516,8 @@ abstract class DBObject implements \Library\Database\LinqObject {
 				$sQ .= "NULL, ";
 			}
 		}
-
-		if (count($Array) > 0) {
-			$sQ = substr($sQ, 0, -2);
-		}
+		$sQ = substr($sQ, 0, -2);
 		$sQ .= ")";
-
-
 		$DB->query($sQ);
 		$id = $DB->insert_id;
 		if ($DB->errno != 0) {
@@ -559,7 +546,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 
 	/**
 	 * Creates a new record in the MySQL and returns result as an Object
-	 *
+	 * 
 	 * @param string[] $Array
 	 * @return self
 	 */
@@ -570,10 +557,10 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		return new $c($id);
 
 	}
-
+	
 	/**
 	 * Gets the error of the database context
-	 *
+	 * 
 	 * @param \MySQLi $DB
 	 * @throws Exception
 	 */
@@ -591,27 +578,27 @@ abstract class DBObject implements \Library\Database\LinqObject {
 
 	/**
 	 * Deletes records
-	 *
+	 * 
 	 * @param string $field Field to search for
 	 * @param string $value Value of the field
 	 * @param int    $start Record to start delete
 	 * @param int    $limit Record to end delete
-	 *
+	 * 
 	 * @return null
 	 */
 	public static function removeByAttribute($field, $value, $start=null, $limit=null) {
 		self::removeByAttributes(array($field=>$value), $start, $limit);
 	}
-
+	
 	/**
 	 * Deletes records using an associative array as search parameter
-	 *
+	 * 
 	 * @param string[] $array Associative array of search parameters
 	 * @param int      $start Start at this record of search
 	 * @param int      $limit End and this record
-	 *
+	 * 
 	 * @throws DBException
-	 *
+	 * 
 	 * @return null
 	 */
 	public static function removeByAttributes($array, $start=null, $limit=null) {
@@ -637,7 +624,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		}
 		return true;
 	}
-
+	
 	/**
 	 * Gets a string which acts as a unique identifier for the object
 	 *
