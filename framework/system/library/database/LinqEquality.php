@@ -5,14 +5,14 @@ abstract class LinqEquality {
 	public $name = "";
 	protected abstract function getSymbol();
 
-	const FIELD = 0;
-	const VALUE = 1;
-	const RAW = 2;
+	const FIELD = 1;
+	const VALUE = 2;
+	const RAW = 3;
 
-	const SUBQUERY_NONE = 0;
-	const SUBQUERY_ANY = 1;
-	const SUBQUERY_SOME = 2;
-	const SUBQUERY_IN = 3;
+	const SUBQUERY_NONE = 1;
+	const SUBQUERY_ANY = 2;
+	const SUBQUERY_SOME = 3;
+	const SUBQUERY_IN = 4;
 
 	function __construct($db, $obj_name="") {
 		$this->name = $obj_name;
@@ -54,6 +54,11 @@ abstract class LinqEquality {
 		$this->fields[] = array($field, "IS", "NULL", null);
 		return $this;
 	}
+	
+	function notnull($field) {
+		$this->fields[] = array($field, "IS NOT", "NULL", null);
+		return $this;
+	}
 
 	function like($field, $value, $a=self::FIELD, $b=self::VALUE, $c=self::SUBQUERY_NONE) {
 		$this->fields[] = array($field, "LIKE", $value, $a, $b, $c);
@@ -87,33 +92,35 @@ abstract class LinqEquality {
 		}
 
 		foreach ($this->fields as $field) {
-
-			switch ($field[3]) {
-				case self::FIELD:
-					$field[0] = "$obj`".$this->db->escape_string($field[0])."`";
-					break;
-				case self::VALUE:
-					$field[0] = $this->getValue($field[0]);
-					break;
+			if (isset($field[3])) {
+				switch ($field[3]) {
+					case self::FIELD:
+						$field[0] = "$obj`".$this->db->escape_string($field[0])."`";
+						break;
+					case self::VALUE:
+						$field[0] = $this->getValue($field[0]);
+						break;
+				}
 			}
-			switch ($field[4]) {
-				case self::FIELD:
-					if (is_object($field[2])) {
-						var_dump($field);
-						throw new DBException("Field value cannot be an object");
-					}
-					$field[2] = "$obj`".$this->db->escape_string($field[2])."`";
-					break;
-				case self::VALUE:
-					$field[2] = $this->getValue($field[2]);
-					break;
+			if (isset($field[4])) {
+				switch ($field[4]) {
+					case self::FIELD:
+						if (is_object($field[2])) {
+							var_dump($field);
+							throw new DBException("Field value cannot be an object");
+						}
+						$field[2] = "$obj`".$this->db->escape_string($field[2])."`";
+						break;
+					case self::VALUE:
+						$field[2] = $this->getValue($field[2]);
+						break;
+				}
 			}
 
 
 
 			if (!($field[0] == "``" || $field[2] == "()")) {
-
-				if ($field[3] === null) {
+				if ($field[3] === null && $field[2] !== "NULL") {
 					$eq = $field[2];
 					$e = $eq->getSQL();
 					if ($e != "") {

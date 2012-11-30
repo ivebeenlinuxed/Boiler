@@ -12,7 +12,15 @@ class LinqDB extends \mysqli {
 
 
 	}
-
+	
+	/**
+	 * Get a select query
+	 * 
+	 * @param string $Obj  Object to select
+	 * @param string $name "AS" in the database query
+	 * 
+	 * @return \Library\Database\LinqSelect
+	 */
 	function Select($Obj, $name="t") {
 		return new LinqSelect($this, $Obj, $name);
 	}

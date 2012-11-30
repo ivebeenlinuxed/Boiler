@@ -10,7 +10,13 @@ $models = getModels();
 foreach ($models as $table=>$model) {
 	$f = "../../framework/system/model/".($c = getClassName($table)).".php";
 	
-	echo "BUILDING $f\r\n";
+	if (isset(\Core\Router::$settings['generation']['system_extend'][$c])) {
+		$extend = \Core\Router::$settings['generation']['system_extend'][$c];
+	} else {
+		$extend = "\Model\DBObject";
+	}
+	
+	echo "BUILDING $f (extends $extend)\r\n";
 	$file = <<<EOF
 <?php
 namespace System\Model;
@@ -22,7 +28,7 @@ EOF;
 	$columnArray = getPHPArray(array_keys($models[$table]['columns']));
 	
 	$file .= <<<EOF
-class $className extends \Model\DBObject {
+class $className extends $extend {
 EOF;
 	foreach ($models[$table]['columns'] as $column=>$desc) {
 		if (substr($desc, 0, strlen("varchar")) == "varchar") {
@@ -106,7 +112,7 @@ EOF;
 	 * @return System\Model\$className
 	 */
 	public function get{$className}() {
-		return new \\Model\\$className(\$this->$key[0]);
+		return \\Model\\$className::Fetch(\$this->$key[0]);
 	}
 EOF;
 		
@@ -133,7 +139,7 @@ EOF;
 		$origClassName = $className = getClassName($key[1]);
 		$selfName = getClassName($table);
 		
-		if ($models[$key[1]]['link_table']) {
+		if ($models[$key[1]]['link_table'] && false) {
 			foreach ($models[$key[1]]['multi'] as $t=>$data) {
 				if ($data[1] != $table) {
 					$className = getClassName($data[1]);

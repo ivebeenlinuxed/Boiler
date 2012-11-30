@@ -69,7 +69,7 @@ class StdLib {
 	}
 
 	public static function processPostcode($pcode) {
-		if (preg_match("/\A(\w{1,2}\d{1,2}\w?){1}(?<sp>\s{0,3})?(\d\w{2}){1}$/", $item, $m)) {
+		if (preg_match("/\A(\w{1,2}\d{1,2}\w?){1}(?<sp>\s{1,3})?(\d\w{2}){1}$/", $pcode, $m)) {
 			return $m;
 		} else {
 			return false;
@@ -274,12 +274,12 @@ class StdLib {
 	}
 
 	public static function xml2object($data) {
-		return json_decode(json_encode(xml2array($data)));
+		return json_decode(json_encode(self::xml2array($data)));
 	}
 
 	public static function xml2array($data) {
 		$data = simplexml_load_string($data);
-		return makeArray($data);
+		return self::makeArray($data);
 	}
 
 
@@ -290,7 +290,7 @@ class StdLib {
 		} else {
 			foreach ($arr as $key=>$value) {
 				if (!is_scalar($value)) {
-					$arr[$key] = makeArray($value);
+					$arr[$key] = self::makeArray($value);
 				}
 			}
 		}

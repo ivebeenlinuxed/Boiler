@@ -24,8 +24,10 @@ class LinqSelect implements LinqQuery {
 		if ((is_object($obj) && is_a($obj, "\Library\Database\LinqSelect")) || (class_exists($obj) && \System\Library\StdLib::is_interface_of($obj, "\Library\Database\LinqObject"))) {
 			$this->obj = $obj;
 			$this->name = $name;
-		} elseif (class_exists($obj, "\Library\Database\LinqObject")) {
+		} elseif (class_exists($obj, true)) {
 			throw new LinqException("Not a LINQ object");
+		} else {
+			$this->obj = $obj;
 		}
 
 
@@ -45,7 +47,7 @@ class LinqSelect implements LinqQuery {
 	/**
 	 * Gets a filter whos conjunction is AND
 	 * 
-	 * @return Library::Database::LinqAND
+	 * @return \Library\Database\LinqAND
 	 */
 	public function getAndFilter() {
 		return $this->db->getAndFilter();
@@ -234,10 +236,10 @@ class LinqSelect implements LinqQuery {
 	 * Add a join query
 	 * 
 	 * @param string                        $field   The field in this query which to join
-	 * @param Library::Database::LinqSelect $select  The Select query to join to
+	 * @param \Library\Database\LinqSelect $select  The Select query to join to
 	 * @param string                        $foreign The key in the joined query to partner with
 	 * 
-	 * @return Library::Database::LinqSelect
+	 * @return \Library\Database\LinqSelect
 	 */
 	function joinLeft($field, $select, $foreign) {
 		if ($select instanceof LinqSelect) {
@@ -252,10 +254,10 @@ class LinqSelect implements LinqQuery {
 	 * Add a join query
 	 *
 	 * @param string                        $field   The field in this query which to join
-	 * @param Library::Database::LinqSelect $select  The Select query to join to
+	 * @param \Library\Database\LinqSelect  $select  The Select query to join to
 	 * @param string                        $foreign The key in the joined query to partner with
 	 * 
-	 * @return Library::Database::LinqSelect
+	 * @return \Library\Database\LinqSelect
 	 */
 	function joinRight($field, $select, $foreign) {
 		if ($select instanceof \Library\Database\LinqSelect) {
@@ -272,7 +274,7 @@ class LinqSelect implements LinqQuery {
 	 * @param string $f  The field in the database to select
 	 * @param string $as The returned name of the field
 	 * 
-	 * @return Library::Database::LinqSelect
+	 * @return \Library\Database\LinqSelect
 	 */
 	function addField($f, $as=null) {
 		if ($f != "*") {
@@ -332,7 +334,7 @@ class LinqSelect implements LinqQuery {
 	 * @param string $field The returning name of the field
 	 * @param string $name  Optional name of the column which to count unique values of
 	 * 
-	 * @return Model::Database::LinqSelect
+	 * @return \Model\Database\LinqSelect
 	 */
 	function addCount($field, $name="*") {
 		if ($name != "*") {
@@ -343,12 +345,69 @@ class LinqSelect implements LinqQuery {
 	}
 	
 	/**
+	 * Adds a MAX value to the select
+	 *
+	 * @param string $field The returning name of the field
+	 * @param string $name  Optional name of the column which to count unique values of
+	 *
+	 * @return \Model\Database\LinqSelect
+	 */
+	function addMax($field, $name) {
+		$name = "`".$this->db->escape_string($name)."`";
+		$this->fields[] = array("MAX(".$name.")", $this->db->escape_string($field));
+		return $this;
+	}
+	
+	/**
+	 * Adds a MIN value to the select
+	 *
+	 * @param string $field The returning name of the field
+	 * @param string $name  Optional name of the column which to count unique values of
+	 *
+	 * @return \Model\Database\LinqSelect
+	 */
+	function addMin($field, $name) {
+		$name = "`".$this->db->escape_string($name)."`";
+		$this->fields[] = array("MIN(".$name.")", $this->db->escape_string($field));
+		return $this;
+	}
+	
+	/**
+	 * Adds a average value of a column to the select
+	 *
+	 * @param string $field The returning name of the field
+	 * @param string $name  Optional name of the column which to count unique values of
+	 *
+	 * @return \Model\Database\LinqSelect
+	 */
+	function addAvg($field, $name) {
+		$name = "`".$this->db->escape_string($name)."`";
+		$this->fields[] = array("AVG(".$name.")", $this->db->escape_string($field));
+		return $this;
+	}
+	
+	
+	/**
+	 * Adds a summed value of a column to the select
+	 *
+	 * @param string $field The returning name of the field
+	 * @param string $name  Optional name of the column which to count unique values of
+	 *
+	 * @return \Model\Database\LinqSelect
+	 */
+	function addSum($field, $name) {
+		$name = "`".$this->db->escape_string($name)."`";
+		$this->fields[] = array("SUM(".$name.")", $this->db->escape_string($field));
+		return $this;
+	}
+	
+	/**
 	 * Sets the LIMIT part of the query
 	 * 
 	 * @param int $start Starting position of the query
 	 * @param int $end   Length of the query
 	 * 
-	 * @return Model::Database::LinqSelect
+	 * @return \Model\Database\LinqSelect
 	 */
 	function setLimit($start, $end) {
 		if (!is_int($start) || !is_int($end)) {
@@ -366,7 +425,7 @@ class LinqSelect implements LinqQuery {
 	 * @param string $name Field or expression to group by
 	 * @param int    $raw  Whether the value should bypass escaping and cleansing
 	 * 
-	 * @return Library::Database::LinqSelect
+	 * @return \Library\Database\LinqSelect
 	 */
 	function setGroup($name, $raw=false) {
 		$this->group = array($name, $raw);
@@ -380,7 +439,7 @@ class LinqSelect implements LinqQuery {
 	 * @param string  $name Name of the field to order by
 	 * @param boolean $asc  Whether to sort Ascending or not
 	 * 
-	 * @return Library::Database::LinqSelect
+	 * @return \Library\Database\LinqSelect
 	 */
 	function setOrder($name, $asc=false) {
 		$this->order = $name;
