@@ -1,19 +1,18 @@
 <?php
 namespace System\Core;
 /**
- *
  * Routes new requests to correct controller
- * 
+ *
  * @category Core
  * @package  Boiler
  * @author   ivebeenlinuxed <will@bcslichfield.com>
  * @license  GNU v3.0 http://www.gnu.org/licenses/gpl-3.0.txt
- * @version  GIT: $Id$
+ * @version  GIT: $Id: 74ebec5ae1937b078f562daaaa0e5852281cc95c $
  * @link     http://www.bcslichfield.com
  *
  */
 abstract class Router {
-	
+
 	public static $settings;
 	/**
 	 *
@@ -35,20 +34,20 @@ abstract class Router {
 	 * @var array
 	 */
 	protected static $fofHandler = array("Controller\\ErrorDocument", "index");
-	
+
 	/**
 	 * Used to hold all the listeners registered via addListener function
-	 * 
+	 *
 	 * @var array
 	 * @see \Core\Router::addListener
-	 */
+	*/
 	protected static $listeners = array();
-	
+
 	/**
 	 *
 	 * Get correct controller, using the argument array
 	 * @param array $controllerArray
-	 */
+	*/
 	public static function getController($controllerArray) {
 		if ((count($controllerArray) == 1 && $controllerArray[0] == "") || count($controllerArray) == 0 || is_array($controllerArray[0])) {
 			return array("Controller\\".static::$defaultController, static::$defaultFunction, array());
@@ -78,10 +77,10 @@ abstract class Router {
 		}
 		return self::$fofHandler;
 	}
-	
+
 	/**
 	 * Initiates bootstraps and the config
-	 * 
+	 *
 	 * @return null
 	 */
 	public static function Init() {
@@ -90,13 +89,13 @@ abstract class Router {
 			self::$settings = $settings;
 		}
 	}
-	
-	
+
+
 	/**
 	 * Get the error page
-	 * 
+	 *
 	 * @param int $error
-	 * 
+	 *
 	 * @return null
 	 */
 	public static function getErrorPage($error) {
@@ -106,23 +105,24 @@ abstract class Router {
 
 	public static function loadView($routerViewObscuratedVariableToAvoidCollision, $variables=array()) {
 		if (strpos($routerViewObscuratedVariableToAvoidCollision, ".") !== false) {
-			throw new Exception("Cannot load views with dots in them");
+			throw new \Exception("Cannot load views with dots in them");
 		}
 		foreach ($variables as $key=>$data) {
 			$$key = $data;
 		}
-		
+
 		if (isset($variables['data'])) {
 			$data = $variables['data'];
 		}
 		include BOILER_LOCATION."application/view/$routerViewObscuratedVariableToAvoidCollision.php";
 	}
-	
+
 	public static function getView($view, $variables=array(), $system=false) {
 		$bufferASystemObscuratedVariableToAvoidCollision = ob_get_clean();
 		ob_start();
 		self::loadView($view, $variables, $system);
 		$bufferBSystemObscuratedVariableToAvoidCollision = ob_get_clean();
+		ob_start();
 		echo $bufferASystemObscuratedVariableToAvoidCollision;
 		return $bufferBSystemObscuratedVariableToAvoidCollision;
 	}
@@ -134,7 +134,7 @@ abstract class Router {
 		foreach ($variables as $key=>$data) {
 			$$key = $data;
 		}
-		
+
 		if (isset($variables['data'])) {
 			$data = $variables['data'];
 		}
@@ -146,14 +146,14 @@ abstract class Router {
 		}
 
 	}
-	
+
 	/**
 	 * Add a listener to the system
-	 * 
+	 *
 	 * @param string $signal   Signal on which to activate
 	 * @param mixed  $callable A callable function
 	 * @param array  $param    Parameters to append after event params
-	 * 
+	 *
 	 * @return null
 	 */
 	public static function addListener($signal, $callable, $param=array()) {
@@ -162,13 +162,13 @@ abstract class Router {
 		}
 		self::$listeners[$signal] = array("callable"=>$callable, "param"=>$param);
 	}
-	
+
 	/**
 	 * Trigger an event in the system
-	 * 
+	 *
 	 * @param string $signal Signal to trigger
 	 * @param array  $param  Event Arguments
-	 * 
+	 *
 	 * @return null
 	 */
 	public static function triggerEvent($signal, $param=array()) {

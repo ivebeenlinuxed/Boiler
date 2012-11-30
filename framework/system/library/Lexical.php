@@ -27,7 +27,7 @@ class Lexical
 		return $result;
 	}
 
-	public static function pluralize( $string )
+	public static function pluralize($string)
 	{
 
 		$plural = array(
@@ -71,21 +71,19 @@ class Lexical
 		);
 
 		// save some time in the case that singular and plural are the same
-		if ( in_array( strtolower( $string ), $uncountable ) )
+		if (in_array(strtolower($string), $uncountable))
 			return $string;
 
 		// check for irregular singular forms
-		foreach ( $irregular as $noun )
-		{
-			if ( strtolower( $string ) == $noun[0] )
+		foreach ($irregular as $noun) {
+			if (strtolower($string) == $noun[0])
 				return $noun[1];
 		}
 
 		// check for matches using regular expressions
-		foreach ( $plural as $pattern )
-		{
-			if ( preg_match( $pattern[0], $string ) )
-				return preg_replace( $pattern[0], $pattern[1], $string );
+		foreach ($plural as $pattern) {
+			if (preg_match($pattern[0], $string))
+				return preg_replace($pattern[0], $pattern[1], $string);
 		}
 
 		return $string;

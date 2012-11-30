@@ -5,13 +5,13 @@ class Framework {
 	function index() {
 		echo "TEST";
 	}
-	
+
 	function phpunit() {
 		if (\Core\Router::$settings['test']['enabled'] == 1) {
 			include BOILER_LOCATION."../build/Selenium2PHPUnit/phpunit_coverage.php";
 		}
 	}
-	
+
 	public function docs() {
 		if (!isset(\Core\Router::$settings['enable_docs']) && \Core\Router::$settings['enable_docs'] != true) {
 			return;

@@ -1,9 +1,9 @@
 <?php
 /**
  * Dummy class to allow exceptions stemming from the framework to be handled specifically
- * 
+ *
  * PHP Version: 5.3
- * 
+ *
  * @category Core
  * @package  Boiler
  * @author   ivebeenlinuxed <will@bcslichfield.com>
@@ -16,9 +16,9 @@ namespace Library\Database;
 
 /**
  * Dummy class to allow exceptions stemming from the framework to be handled specifically
- * 
+ *
  * PHP Version: 5.3
- * 
+ *
  * @category Core
  * @package  Boiler
  * @author   ivebeenlinuxed <will@bcslichfield.com>
@@ -27,5 +27,5 @@ namespace Library\Database;
  *
  */
 class DBException extends \Library\BoilerException {
-	
+
 }
