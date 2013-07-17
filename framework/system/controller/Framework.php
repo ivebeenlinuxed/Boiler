@@ -5,10 +5,14 @@ class Framework {
 	function index() {
 		echo "TEST";
 	}
+	
+	function phpinfo() {
+		phpinfo();
+	}
 
 	function phpunit() {
 		if (\Core\Router::$settings['test']['enabled'] == 1) {
-			include BOILER_LOCATION."../build/Selenium2PHPUnit/phpunit_coverage.php";
+			include BOILER_LOCATION."../build/phpunit/Bindings/phpunit_coverage.php";
 		}
 	}
 

@@ -151,6 +151,14 @@ class StdLib {
 		return (preg_match("/[a-z\d.-_\+]+@[a-z\d.-_\+]+\.[a-z.]+/", $email) > 0)? true : false;
 	}
 
+	/**
+	 * Order objects by a property
+	 * 
+	 * @param array  $aObj     Array of objects to order
+	 * @param string $property The property to order names by
+	 * 
+	 * @return array
+	 */
 	public static function object_order($aObj, $property) {
 		$cursor = 1;
 		$comparison = 1;
@@ -280,6 +288,9 @@ class StdLib {
 		return self::makeArray($data);
 	}
 
+	public static function object2array($obj) {
+		return self::makeArray($obj);
+	}
 
 	public static function makeArray($obj) {
 		$arr = (array)$obj;

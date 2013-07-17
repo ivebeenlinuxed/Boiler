@@ -9,6 +9,10 @@ define("BOILER_LOCATION", __DIR__."/../framework/");
 define("BOILER_TMP", __DIR__."/../tmp/");
 define("BOILER_HTDOCS", __DIR__);
 
+if (file_exists(BOILER_LOCATION."../build/phpunit/Bindings/includes/prepend.php")) {
+	include BOILER_LOCATION."../build/phpunit/Bindings/includes/prepend.php";
+}
+
 /**
  * Automatically loads the needed classes in the rest of the framework
  * 
@@ -61,3 +65,6 @@ if (!isset($_SERVER['no_run'])) {
 	call_user_func_array(array($obj, $call[1]), $call[2]);
 }
 
+if (file_exists(BOILER_LOCATION."../build/phpunit/Bindings/includes/append.php")) {
+	include BOILER_LOCATION."../build/phpunit/Bindings/includes/append.php";
+}

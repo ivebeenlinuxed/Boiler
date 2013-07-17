@@ -12,7 +12,6 @@ class LinqSelect implements LinqQuery {
 	public $db;
 	public $group;
 	public $order;
-	public $orderAsc;
 
 	public $filter;
 
@@ -37,7 +36,7 @@ class LinqSelect implements LinqQuery {
 		$this->filter = false;
 		$this->join = array();
 		$this->group = false;
-		$this->order = false;
+		$this->order = array();
 	}
 
 	public function Select($name="t") {
@@ -211,15 +210,17 @@ class LinqSelect implements LinqQuery {
 		//if ($this->filter) {
 		//	$sql .= " WHERE ".$this->filter->getSQL();
 		//}
-		if ($this->order !== false) {
-			if ($this->order === null) {
+		if (count($this->order) > 0) {
+			if ($this->order[0][0] == false) {
 				$sql .= " ORDER BY RAND()";
 			} else {
-				$sql .= " ORDER BY `".$this->db->escape_string($this->order)."`";
-				if ($this->orderAsc) {
-					$sql .= " ASC";
-				} else {
-					$sql .= " DESC";
+				foreach ($this->order as $cols) {
+					$sql .= " ORDER BY `".$this->db->escape_string($cols[0])."`";
+					if ($this->orderAsc) {
+						$sql .= " {$cols[1]} ";
+					} else {
+						$sql .= " {$cols[1]} ";
+					}
 				}
 			}
 		}
@@ -443,12 +444,11 @@ class LinqSelect implements LinqQuery {
 	 * @return \Library\Database\LinqSelect
 	 */
 	function setOrder($name, $asc=false) {
-		$this->order = $name;
-		if ($asc) {
-			$this->orderAsc = true;
-		} else {
-			$this->orderAsc = false;
-		}
+		return $this->addOrder($name, $asc);
+	}
+	
+	function addOrder($name, $asc=false) {
+		$this->order[] = array($name, $asc==true? "ASC" : "DESC");
 		return $this;
 	}
 	

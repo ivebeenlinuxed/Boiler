@@ -54,7 +54,7 @@ abstract class LinqEquality {
 		$this->fields[] = array($field, "IS", "NULL", null);
 		return $this;
 	}
-	
+
 	function notnull($field) {
 		$this->fields[] = array($field, "IS NOT", "NULL", null);
 		return $this;

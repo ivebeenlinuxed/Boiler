@@ -10,9 +10,16 @@
 		<exclude name="PEAR.Functions.FunctionDeclaration.NewlineBeforeOpenBrace" />
 		<exclude name="PEAR.Functions.FunctionDeclaration.NewlineBeforeOpenBrace" />
 		<exclude name="PEAR.WhiteSpace.ScopeIndent.Incorrect" />
+		<exclude name="Generic.WhiteSpace.DisallowTabIndent.TabsUsed" />
+		<exclude name="PEAR.Commenting.ClassComment.InvalidVersion" />
 		<exclude name="PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore" />
-		<exclude name="PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore" />
+		<exclude name="PEAR.WhiteSpace.ScopeClosingBrace.BreakIdent" />
+		
 	</rule>
+	
+	<suppressions>
+		<suppress files="controller/" checks="PEAR.NamingConventions.ValidClassName.Invalid" />
+	</suppressions>
 
 	<rule ref="Generic.Files.LineLength">
 		<properties>
@@ -41,4 +48,11 @@
 			<property name="error" value="false" />
 		</properties>
 	</rule>
+	
+	<rule ref="PEAR.WhiteSpace.ScopeClosingBrace.BreakIdent">
+		<properties>
+			<property name="indent" value="0" />
+		</properties>
+	</rule>
+	
 </ruleset>

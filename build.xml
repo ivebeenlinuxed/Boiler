@@ -4,8 +4,6 @@
 	<property name="db" value="urban_walks" />
 	<property name="db_user" value="urban-walks" />
 	<property name="db_password" value="urbanwalkspasswd123=" />
-	<property name="db_server" value="localhost" />
-	<property name="db_port" value="3306" />
 
 	<target name="build" depends="db-config" />
 	<target name="test" depends="docs,phpunit,phpcpd,phpmd,phpcs,skelgen" />
@@ -22,6 +20,12 @@
 					<arg line=" 'models-clean.php'" />
 				</exec>
 		</target>
+
+	<target name="api" depends="db-config">
+		<exec executable="php" dir="${basedir}/build/generation" failonerror="off">
+			<arg line=" 'api.php'" />
+		</exec>
+	</target>
 	
 	<target name="docs" depends="init">
 		<exec executable="${cmd.doxygen}" dir="${basedir}" failonerror="off">
@@ -98,7 +102,15 @@
 	<target name="phpunit" depends="init,db-testdata,skelgen">
 		<exec executable="phpunit" dir="${basedir}" failonerror="off">
 			<arg
-				line=" --bootstrap '${basedir}/build/phpunit.php' --log-junit '${basedir}/build/logs/phpunit.xml' --coverage-clover '${basedir}/build/logs/clover.xml' --coverage-html '${basedir}/build/logs/coverage' '${basedir}/tests/'" />
+				line=" --bootstrap '${basedir}/build/phpunit/phpunit.php' --log-junit '${basedir}/build/logs/phpunit.xml' --coverage-clover '${basedir}/build/logs/clover.xml' --coverage-html '${basedir}/build/logs/coverage' '${basedir}/tests/'" />
+		</exec>
+	</target>
+	
+
+	<target name="phpunit-manual">
+		<exec executable="phpunit" dir="${basedir}" failonerror="off">
+			<arg
+				line=" --bootstrap '${basedir}/build/phpunit/phpunit.php' --log-junit '${basedir}/build/logs/phpunit.xml' --coverage-clover '${basedir}/build/logs/clover.xml' --coverage-html '${basedir}/build/logs/coverage' '${basedir}/tests/${test}'" />
 		</exec>
 	</target>
 </project>

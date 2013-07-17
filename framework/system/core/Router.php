@@ -53,7 +53,11 @@ abstract class Router {
 			return array("Controller\\".static::$defaultController, static::$defaultFunction, array());
 		}
 		for ($i=1; $i<=count($controllerArray) && !is_array($controllerArray[$i-1]); $i++) {
-			$controllerArray[$i-1] = ucfirst($controllerArray[$i-1]);
+			if (strpos($controllerArray[$i-1], "_") !== false) {
+				$controllerArray[$i-1] = implode("_",array_map(function($data) {return ucfirst($data);}, explode("_", $controllerArray[$i-1])));
+			} else {
+				$controllerArray[$i-1] = ucfirst($controllerArray[$i-1]);
+			}
 			if (class_exists($c = "Controller\\".implode("\\", array_slice($controllerArray, 0, $i)), true)) {
 				$cOK = $c;
 				if (isset($controllerArray[$i]) && is_callable(array($c, $f = $controllerArray[$i]))) {
