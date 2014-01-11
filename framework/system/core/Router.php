@@ -162,7 +162,11 @@ abstract class Router {
 		if (isset($variables['data'])) {
 			$data = $variables['data'];
 		}
-		include BOILER_LOCATION."application/view/$routerViewObscuratedVariableToAvoidCollision.php";
+		if (file_exists(BOILER_LOCATION."application/view/$routerViewObscuratedVariableToAvoidCollision.php")) {
+			include BOILER_LOCATION."application/view/$routerViewObscuratedVariableToAvoidCollision.php";
+		} else {
+			include BOILER_LOCATION."system/view/$routerViewObscuratedVariableToAvoidCollision.php";
+		}
 	}
 	
 	public static function hasView($routerViewObscuratedVariableToAvoidCollision) {
