@@ -23,7 +23,7 @@ class Router extends \System\Core\Router {
 	
 	/**
 	 * Example of how to use extentions
-	 
+	 */
 	 
 	public static function getController($array) {
 		
@@ -61,7 +61,7 @@ class Router extends \System\Core\Router {
 		}
 		return parent::getController($array);
 	}
-	*/
+	
 	
 	public static function addEventListener($signal, $callback) {
 		if (!isset(self::$listeners[$signal])) {
