@@ -30,6 +30,29 @@ namespace Model;
  */
 abstract class DBObject extends \System\Model\DBObject {
 
+	public static $data_map;
+	
+	public static function getWidgetTypeByColumn($col) {
+		if (static::$data_map[$col]) {
+			return static::$data_map[$col];
+		}
+		return \Library\Widget\Widget::TEXT;
+	}
+	
+	public static function getWidgetByColumn($col) {
+		$w = \Library\Widget\Widget::getWidgetByClass(self::getWidgetTypeByColumn($col));
+		return $w;
+	}
+	
+	public function getWidgetByField($field) {
+		$w = \Library\Widget\Widget::getWidgetByClass(self::getWidgetTypeByColumn($field));
+		$w->field = $field;
+		$w->table = static::getTable();
+		$w->id = $this->id;
+		$w->setResult($this->$field);
+		return $w;
+	}
+	
 	/**
 	 * Override to allow Router settings to take effect
 	 * 
@@ -38,4 +61,6 @@ abstract class DBObject extends \System\Model\DBObject {
 	public static function getDB() {
 		return \Library\Database\LinqDB::getDB(\Core\Router::$settings['database']['server'], \Core\Router::$settings['database']['user'], \Core\Router::$settings['database']['passwd'], \Core\Router::$settings['database']['db']);
 	}
+	
+	
 }
