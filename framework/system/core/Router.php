@@ -12,6 +12,15 @@ namespace System\Core;
  *
  */
 abstract class Router {
+	const MODE_JSON = 0;
+	const MODE_HTML = 1;
+	const MODE_XML = 2;
+	const MODE_JPG = 3;
+	const MODE_PNG = 4;
+	const MODE_SVG = 5;
+	const MODE_GIF = 6;
+	
+	public static $mode;
 
 	public static $settings;
 	/**
@@ -49,6 +58,41 @@ abstract class Router {
 	 * @param array $controllerArray
 	*/
 	public static function getController($controllerArray) {
+		preg_match("/[a-zA-Z0-9_]+(\.(?<extension>html|json|xml|jpg|png|svg|gif))?/", $array[count($array)-1], $matches);
+		if (isset($matches['extension'])) {
+			switch ($matches['extension']) {
+				case "json":
+					self::$mode = self::MODE_JSON;
+					break;
+				case "html":
+					self::$mode = self::MODE_HTML;
+					break;
+				case "xml":
+					self::$mode = self::MODE_XML;
+					break;
+				case "jpg":
+					self::$mode = self::MODE_JPG;
+					break;
+				case "png":
+					self::$mode = self::MODE_PNG;
+					break;
+				case "svg":
+					self::$mode = self::MODE_SVG;
+					break;
+				case "gif":
+					self::$mode = self::MODE_GIF;
+					break;
+				default:
+					self::$mode = self::MODE_HTML;
+					break;
+			}
+			$array[count($array)-1] = substr($array[count($array)-1], 0, (strlen($matches['extension'])+1)*-1);
+		} else {
+			self::$mode = self::MODE_HTML;
+		}
+		
+		
+		
 		if ((count($controllerArray) == 1 && $controllerArray[0] == "") || count($controllerArray) == 0 || is_array($controllerArray[0])) {
 			return array("Controller\\".static::$defaultController, static::$defaultFunction, array());
 		}
@@ -119,6 +163,10 @@ abstract class Router {
 			$data = $variables['data'];
 		}
 		include BOILER_LOCATION."application/view/$routerViewObscuratedVariableToAvoidCollision.php";
+	}
+	
+	public static function hasView($routerViewObscuratedVariableToAvoidCollision) {
+		return file_exists(BOILER_LOCATION."application/view/$routerViewObscuratedVariableToAvoidCollision.php");
 	}
 
 	public static function getView($view, $variables=array(), $system=false) {
