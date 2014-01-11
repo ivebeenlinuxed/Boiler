@@ -222,10 +222,41 @@ EOF;
 	public function getBy{$name}($args) {
 		return self::getByAttributes(array($selector));
 	}
-		
+	
 EOF;
 	}
-	
+
+	echo " - bubbleUpdateResult(\$update_result)\r\n";
+	$file .= <<<EOF
+
+	public function bubbleUpdateResult(\$update_result, \$loop_control=array()) {
+		if (in_array(get_class(), \$loop_control)) {
+			return;
+		}
+		\$loop_control[] = get_class();
+		\$update_result->module = get_class();
+		\$c = get_class();
+		\$update_result->module_table = \$c::getTable();
+		
+		\Library\RTCQueue::Send("/model/".self::getTable()."/{\$this->id}", \$update_result);
+EOF;
+	foreach ($models[$table]['multi'] as $col=>$key) {
+		//if ($key[2] != $models[$key[1]]['key'][0] || count($models[$key[1]]['key']) != 1) {
+		//	continue;
+		//}
+		$className = getClassName($key[1]);
+		$selfName = getClassName($table);
+		$column = getClassName($key[0]);
+		$file .= "
+		\$obj = \$this->get{$column}();
+		if (\$obj) {
+			\$obj->bubbleUpdateResult(\$update_result, \$loop_control);
+		}\r\n";
+	}
+
+	$file .= <<<EOF
+	}
+EOF;
 	$file .= <<<EOF
 
 }

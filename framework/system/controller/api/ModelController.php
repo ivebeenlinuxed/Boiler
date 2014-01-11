@@ -5,9 +5,14 @@ use \Library\Data\DataStream;
 
 abstract class ModelController extends \Controller\BaseController {
 	protected $inputData;
-	protected $searchParams;
+	public $searchParams;
 	protected $fetchObjects = false;
 	protected $outputData = false;
+	public $protocol = array();
+	public $query = false;
+	
+	public $page = 0;
+	public $page_size = 10;
 
 	const OK = 200;
 	const ERROR_NOT_FOUND = 404;
@@ -22,38 +27,103 @@ abstract class ModelController extends \Controller\BaseController {
 		if ($id == "undefined") {
 			$id = false;
 		}
-		$this->searchParams = $_GET;
-
+		
+		if ($id == "add") {
+			$this->add();
+		}
+		
+		if (($u = $this->getCurrentUser()) == false) {
+			$this->DisplayError("Not logged in");
+			return;
+		}
+		
+		$this->protocol = $this->ProtocolRequest();
+		$this->searchParams = $this->ConditionalRequest();
+		
+		
+		if ($_SERVER['HTTP_X_PAGE']) {
+			$epg = explode("/", $_SERVER['HTTP_X_PAGE']);
+			$this->page = (int)$epg[0];
+			if ($epg[1]) {
+				$this->page_size = (int)$epg[1];
+			}
+		}
+		
 		
 		if ($_SERVER['REQUEST_METHOD'] == "PUT") {
 			foreach ($this->parse_raw_http_request() as $block) {
 				$_POST[$block['name']] = $block['block'];
 			}
 		}
+		
 
-		if ($_SERVER['REQUEST_METHOD'] == "POST") {
-			$input = $this->Input();
+		if ($_SERVER['REQUEST_METHOD'] == "POST" && !isset($this->searchParams['__GET_OVERRIDE'])) {
+			$this->protocol['edit'] = true;
+			$input = $this->InputHTTP();
 			$fetch = $this->AlterCreate($input);
 		} else {
-			$fetch = $this->Fetch($id);
+			if ($_SERVER['REQUEST_METHOD'] == "POST") {
+				$this->searchParams = $this->Input();
+				$fetch = $this->FetchSpecial();
+			} else {
+				$fetch = $this->Fetch($id);
+			}
 			switch ($_SERVER['REQUEST_METHOD']) {
 				case "DELETE":
-					$this->AlterDelete($fetch);
+					$del_fetch = $this->CompleteFetch($fetch);
+					$this->AlterDelete($del_fetch);
 					$fetch = false;
 					break;
 				case "PUT":
 					$input = $this->Input();
-					$fetch = $this->AlterChange($fetch, $input);
+					$put_fetch = $this->CompleteFetch($fetch);
+					$fetch = $this->AlterChange($put_fetch, $input);
 					break;
 			}
 		}
+		
+		
 
-
-		$this->ProtocolRequest();
 		$this->Output($fetch);
+	}
+	
+	/**
+	 * 
+	 */
+	protected function add() {
+		$c = static::getModelClass();
+		$key = $c::getPrimaryKey()[0];
+		$obj = $c::Create();
+		header("Location: /api/{$c::getTable()}/{$obj->$key}?__edit=1");
 	}
 
 	protected function ProtocolRequest() {
+		$proto = array();
+		foreach ($_GET as $key=>$value) {
+			if (substr($key, 0, 4) == "__X_") {
+				$_SERVER['HTTP_X_'.substr($key, 4)] = $value;
+			}
+			
+			if (substr($key, 0, 2) == "__") {
+				$keyb = substr($key, 2);
+				$proto[$keyb] = $value;
+				unset($_GET[$key]);
+			}
+		}
+		unset($_GET['_pjax']);
+		return $proto;
+	}
+	
+	protected function ConditionalRequest() {
+		if ($this->protocol['where']) {
+			$conditions = json_decode($this->protocol['where']);
+		} else {
+			$conditions = array();
+		}
+		foreach ($_GET as $key=>$data) {
+			$conditions[] = array($key, "LIKE", "%".$data."%");
+		}
+		return $conditions;
 	}
 
 	protected function DisplayError($error) {
@@ -62,11 +132,21 @@ abstract class ModelController extends \Controller\BaseController {
 	}
 
 	protected function Input() {
-		$data = $this->InputHTTP();
+		//switch (\Core\Router::$mode) {
+		//	case \Core\Router::MODE_XML:
+		//		$data = self::InputXML();
+		//		break;
+		//	case \Core\Router::MODE_JSON:
+		//		$data = self::InputJSON();
+		//		break;
+		//	default:
+				$data = self::InputHTTP();
+		//		break;
+		//}
 		return $data;
 	}
 
-	public function InputHTTP() {
+	protected function InputHTTP() {
 		$rawdata = $_POST;
 		$d = new DataStream();
 		foreach ($_POST as $key=>$data) {
@@ -81,23 +161,24 @@ abstract class ModelController extends \Controller\BaseController {
 		return $d;
 	}
 
-	public function InputJSON() {
+	protected function InputJSON() {
 		$rawdata = json_decode(file_get_contents("php://input"));
 		$d = new DataStream();
-		foreach ($_POST as $key=>$data) {
+		foreach ($rawdata as $key=>$data) {
 			if (substr($key, 0, 2) == "__") {
 				$d->protocol[substr($key, 2)] = $data;
 				unset($rawdata[$key]);
 			}
 		}
-		if ($_POST != null) {
+		if ($rawdata != null) {
 			$d->data = $rawdata;
 		}
+		var_dump($_POST, $d);
 		return $d;
 
 	}
 
-	public function InputXML() {
+	protected function InputXML() {
 		$rawdata = \System\Library\StdLib::xml2object(file_get_contents("php://input"));
 		$d = new DataStream();
 		foreach ($_POST as $key=>$data) {
@@ -123,18 +204,60 @@ abstract class ModelController extends \Controller\BaseController {
 				break;
 		}
 	}
-	public function OutputHTTP($d) {
+	protected function OutputHTTP($d) {
+		$c = $this->getModelClass();
+		$table = $c::getTable();
+		if (is_a($d, "\Library\Database\LinqSelect")) {
+			switch ($_SERVER['HTTP_X_DISPOSITION']) {
+				case "modal":
+					$view = "/list/modal";
+					break;
+				default:
+					$view = "/list/full";
+					break;
+			}
+		} elseif ($this->protocol['edit']) {
+			switch ($_SERVER['HTTP_X_DISPOSITION']) {
+				case "modal":
+					$view = "/edit/modal";
+					break;
+				default:
+					$view = "/edit/full";
+					break;
+			}
+		} else {
+			switch ($_SERVER['HTTP_X_DISPOSITION']) {
+				case "modal":
+					$view = "/view/modal";
+					break;
+				default:
+					$view = "/view/full";
+					break;
+			}
+		}
+		if (\Core\Router::hasView("api/{$table}{$view}")) {
+			\Core\Router::loadView("api/{$table}{$view}", array("table"=>$table, "class"=>$c, "data"=>$d, "controller"=>$this));
+		} else {
+			\Core\Router::loadView("api/_generic{$view}", array("table"=>$table, "class"=>$c, "data"=>$d, "controller"=>$this));
+			
+		}
+		
+		
 		if ($d->protocol['redirect']) {
 			header("Location: ".$d->protocol['redirect']);
 		}
-		echo "OK";
 	}
 
-	public function OutputJSON($fetch) {
+	protected function OutputJSON($fetch) {
+		$fetch = $this->CompleteFetch($fetch);
+		$c = get_called_class();
+		if (is_callable(array($this->getModelClass(), "OverrideApi"))) {
+			$fetch = call_user_func(array($this->getModelClass(), "OverrideApi"), $fetch);
+		}
 		echo json_encode($fetch);
 	}
 
-	public function OutputXML() {
+	protected function OutputXML() {
 
 	}
 
@@ -144,33 +267,67 @@ abstract class ModelController extends \Controller\BaseController {
 
 
 		if ($id !== false) {
-			$data = $this->FetchRequest(array($key[0]=>$id), false);
-			if (!is_array($data)) {
-				return $data;
-			}
-			if (count($data) != 1) {
-				throw new \Exception(self::ERROR_NOT_FOUND);
-			}
+			$data = $class::Fetch($id);
 			return $data;
 		}
 		$data = $this->FetchRequest($this->searchParams, true);
-		if (!is_array($data)) {
-			return $data;
-		}
 		return $data;
 	}
 
 	protected function FetchRequest($search, $fuzzy=true) {
 		$class = $this->getModelClass();
-		if (!$fuzzy) {
-			return $class::getByAttributes($search);
-		} else {
-			$out = array();
-			foreach ($search as $field=>$data) {
-				$out = array_merge($out, $class::Search($field, $data));
+		
+		
+		
+		$ids = array();
+		$db = $class::getDB();
+		$select = $db->Select($class);
+		$and = $select->getAndFilter();
+		foreach ($search as $param) {
+			switch ($param[1]) {
+				case "=":
+					$and->eq($param[0], $param[2]);
+					break;
+				case "!=":
+					$and->neq($param[0], $param[2]);
+					break;
+				case "<":
+					$and->lt($param[0], $param[2]);
+					break;
+				case ">":
+					$and->gt($param[0], $param[2]);
+					break;
+				case "<=":
+					$and->lteq($param[0], $param[2]);
+					break;
+				case ">=":
+					$and->gteq($param[0], $param[2]);
+					break;
+				case "LIKE":
+					$and->like($param[0], $param[2]);
+					break;
+				case "NOT LIKE":
+					$and->nlike($param[0], $param[2]);
+					break;
+				default:
+					new \Library\APIException("The equality symbol was note recognised");
 			}
-			return $out;
 		}
+		$select->setFilter($and);
+		$this->query = $select;
+		return $select;
+		
+		
+	}
+	
+	protected function CompleteFetch($select) {
+		$class = static::getModelClass();
+		$key = $class::getPrimaryKey()[0];
+		$out = array();
+		foreach ($select->Exec() as $row) {
+			$out[] = new $class($row[$key]);
+		}
+		return $out;
 	}
 
 	protected function AlterWithObject() {
@@ -180,12 +337,7 @@ abstract class ModelController extends \Controller\BaseController {
 
 
 	protected function AlterDelete($fetch) {
-		foreach ($fetch as $obj) {
-			if (($code = $this->DeleteRequest($obj)) != self::OK) {
-				return $code;
-			}
-		}
-		return self::OK;
+		return $this->DeleteRequest($fetch);
 	}
 
 	protected function DeleteRequest($obj) {
@@ -194,12 +346,8 @@ abstract class ModelController extends \Controller\BaseController {
 	}
 
 	protected function AlterChange($fetch, $input) {
-		$output = array();
-		foreach ($fetch as $obj) {
-			$code = $this->ChangeRequest($obj, $input->data);
-			$output[] = $obj;
-		}
-		return $output;
+		$this->ChangeRequest($fetch, $input->data);
+		return $fetch;
 	}
 
 	protected function ChangeRequest($obj, $fields) {
