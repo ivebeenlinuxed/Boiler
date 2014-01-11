@@ -1,0 +1,22 @@
+@CHARSET "UTF-8";
+
+.search-control .search-generator {
+	width: 100%;
+	position: absolute;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	text-align: center;
+	padding: 10px;
+	display: block;
+	background: white;
+	display: none;
+	z-index: 1000;
+}
+
+.search-control .form-expression {
+	display: none;
+}
+
+.search-control .form-expression.active {
+	display: inline-block;
+}
