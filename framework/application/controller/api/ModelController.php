@@ -27,6 +27,6 @@ namespace Controller\Api;
  * @link     http://www.mercianlabels.com
  *
  */
-class ModelController extends \System\Controller\Api\ModelController {
+abstract class ModelController extends \System\Controller\Api\ModelController {
 	
 }
