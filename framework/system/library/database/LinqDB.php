@@ -58,9 +58,13 @@ class LinqDB extends \mysqli {
 		}
 		return self::$masterDB[$hash];
 	}
+	
+	public function getResult($s) {
+		return $this->query($s);
+	}
 
 	function Exec($s) {
-		$o = $this->query($s);
+		$o = $this->getResult($s);
 		$out = array();
 
 		if ($this->errno != 0) {

@@ -211,17 +211,20 @@ class LinqSelect implements LinqQuery {
 		//	$sql .= " WHERE ".$this->filter->getSQL();
 		//}
 		if (count($this->order) > 0) {
-			if ($this->order[0][0] == false) {
+			if ($this->order[0][0] === false) {
 				$sql .= " ORDER BY RAND()";
-			} else {
+			} elseif (isset($this->order[0][0])) {
+				$sql .= " ORDER BY ";
 				foreach ($this->order as $cols) {
-					$sql .= " ORDER BY `".$this->db->escape_string($cols[0])."`";
+					$sql .= "`".$this->db->escape_string($cols[0])."`";
 					if ($this->orderAsc) {
 						$sql .= " {$cols[1]} ";
 					} else {
 						$sql .= " {$cols[1]} ";
 					}
+					$sql .= ", ";
 				}
+				$sql = substr($sql, 0, -2);
 			}
 		}
 
@@ -322,7 +325,7 @@ class LinqSelect implements LinqQuery {
 	 */
 	function setFilter($f) {
 		if (!is_subclass_of($f, "\Library\Database\LinqEquality")) {
-			die("Must be a LINQ Equality");
+			throw new DBException("Must be a LINQ Equality");
 		} else {
 			$f->setName(trim($this->getTable(),"`"));
 			$this->filter = $f;
@@ -413,7 +416,7 @@ class LinqSelect implements LinqQuery {
 	 */
 	function setLimit($start, $end) {
 		if (!is_int($start) || !is_int($end)) {
-			throw LinqException("Limit must be integer");
+			throw DBException("Limit must be integer");
 		}
 		$this->start = $start;
 		$this->end = $end;
@@ -459,6 +462,10 @@ class LinqSelect implements LinqQuery {
 	 */
 	public function Exec() {
 		return $this->db->Exec($this->getSQL());
+	}
+	
+	public function getResult() {
+		return $this->db->getResult($this->getSQL());
 	}
 }
 ?>

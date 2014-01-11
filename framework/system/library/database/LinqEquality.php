@@ -1,7 +1,7 @@
 <?php
 namespace Library\Database;
 abstract class LinqEquality {
-	protected $fields;
+	public $fields;
 	public $name = "";
 	protected abstract function getSymbol();
 
