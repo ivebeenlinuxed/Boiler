@@ -22,6 +22,7 @@
 		</target>
 
 	<target name="api" depends="db-config">
+		<mkdir dir="${basedir}/framework/application/controller/api" />
 		<exec executable="php" dir="${basedir}/build/generation" failonerror="off">
 			<arg line=" 'api.php'" />
 		</exec>
