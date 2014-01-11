@@ -57,7 +57,7 @@ abstract class Router {
 	 * Get correct controller, using the argument array
 	 * @param array $controllerArray
 	*/
-	public static function getController($controllerArray) {
+	public static function getController($array) {
 		preg_match("/[a-zA-Z0-9_]+(\.(?<extension>html|json|xml|jpg|png|svg|gif))?/", $array[count($array)-1], $matches);
 		if (isset($matches['extension'])) {
 			switch ($matches['extension']) {
@@ -90,7 +90,7 @@ abstract class Router {
 		} else {
 			self::$mode = self::MODE_HTML;
 		}
-		
+		$controllerArray = $array;
 		
 		
 		if ((count($controllerArray) == 1 && $controllerArray[0] == "") || count($controllerArray) == 0 || is_array($controllerArray[0])) {
