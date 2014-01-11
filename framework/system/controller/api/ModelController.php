@@ -32,10 +32,7 @@ abstract class ModelController extends \Controller\BaseController {
 			$this->add();
 		}
 		
-		if (($u = $this->getCurrentUser()) == false) {
-			$this->DisplayError("Not logged in");
-			return;
-		}
+		
 		
 		$this->protocol = $this->ProtocolRequest();
 		$this->searchParams = $this->ConditionalRequest();

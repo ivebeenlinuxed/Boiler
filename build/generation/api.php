@@ -18,6 +18,7 @@ require_once "common.php";
 
 $models = getModels();
 
+
 foreach ($models as $table=>$model) {
 	if (strpos($table, "_") !== false) {
 		$class = implode("_",array_map(function($data) {
@@ -61,7 +62,7 @@ namespace System\Controller\Api;
  * @link     http://www.mercianlabels.com
  *
  */
-class {$class} extends \\System\\Controller\\Api\\ModelController {
+class {$class} extends \\Controller\\Api\\ModelController {
 
 	/**
 	 * Parses the name of the model which this API endpoint represents to the ModelController
