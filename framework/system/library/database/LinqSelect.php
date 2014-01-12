@@ -416,7 +416,7 @@ class LinqSelect implements LinqQuery {
 	 */
 	function setLimit($start, $end) {
 		if (!is_int($start) || !is_int($end)) {
-			throw DBException("Limit must be integer");
+			throw new DBException("Limit must be integer");
 		}
 		$this->start = $start;
 		$this->end = $end;

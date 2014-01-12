@@ -10,9 +10,12 @@ abstract class ModelController extends \Controller\BaseController {
 	protected $outputData = false;
 	public $protocol = array();
 	public $query = false;
-	
+
 	public $page = 0;
 	public $page_size = 10;
+
+	public $view = false;
+	public $disposition = "full";
 
 	const OK = 200;
 	const ERROR_NOT_FOUND = 404;
@@ -22,22 +25,17 @@ abstract class ModelController extends \Controller\BaseController {
 
 	protected abstract function getModelClass();
 
-	public function index($id=false) {
-		//FIXME this should not happen!
-		if ($id == "undefined") {
-			$id = false;
-		}
-		
-		if ($id == "add") {
-			$this->add();
-		}
-		
-		
-		
+	public function index($id=false, $view=false) {
+		// Underscored advanced data needs to be removed, before the novices get their turn
 		$this->protocol = $this->ProtocolRequest();
+		
+		// Standard REST data processed
 		$this->searchParams = $this->ConditionalRequest();
 		
+		// Get the class we're going to be working with
+		$class = static::getModelClass();
 		
+		//Pagination needs to be initialised from headers
 		if ($_SERVER['HTTP_X_PAGE']) {
 			$epg = explode("/", $_SERVER['HTTP_X_PAGE']);
 			$this->page = (int)$epg[0];
@@ -46,46 +44,89 @@ abstract class ModelController extends \Controller\BaseController {
 			}
 		}
 		
+		if ($_SERVER['HTTP_X_DISPOSITION']) {
+			$this->disposition = $_SERVER['HTTP_X_DISPOSITION'];
+		}
 		
+		//PUT requests need to be processed manually
 		if ($_SERVER['REQUEST_METHOD'] == "PUT") {
 			foreach ($this->parse_raw_http_request() as $block) {
 				$_POST[$block['name']] = $block['block'];
 			}
 		}
 		
-
-		if ($_SERVER['REQUEST_METHOD'] == "POST" && !isset($this->searchParams['__GET_OVERRIDE'])) {
+		//Create before deciding which view to use
+		if ($_SERVER['REQUEST_METHOD'] == "POST") {
 			$this->protocol['edit'] = true;
 			$input = $this->InputHTTP();
-			$fetch = $this->AlterCreate($input);
+			$data = $this->AlterCreate($input);
+			$key = $class::getPrimaryKey()[0];
+			$id = $data->$key;
+		}
+
+		
+		if ($id === false || ((int)$id == 0 && $id != "0")) {
+			//Get the default collection view;
+			$view_type = "collection";
+			$default_view = "list";
+			//Array
+			$data = $this->Fetch($id);
+			$qData = $data->getResult();
+			$num_rows = $qData->num_rows;
+			$qData->free_result();
+			$data->setLimit($this->page*$this->page_size, $this->page_size);
+			$data = $data->Exec();
 		} else {
-			if ($_SERVER['REQUEST_METHOD'] == "POST") {
-				$this->searchParams = $this->Input();
-				$fetch = $this->FetchSpecial();
-			} else {
-				$fetch = $this->Fetch($id);
-			}
+			//Get the default views setup
+			$view_type = "singular";
+			$default_view = "view";
+			
+			//We're only ever going to have one row
+			$num_rows = 1;
+			
+			//Object
+			$data = $class::Fetch($id);
 			switch ($_SERVER['REQUEST_METHOD']) {
 				case "DELETE":
-					$del_fetch = $this->CompleteFetch($fetch);
-					$this->AlterDelete($del_fetch);
-					$fetch = false;
+					$this->AlterDelete($data);
+					$data = false;
 					break;
 				case "PUT":
 					$input = $this->Input();
-					$put_fetch = $this->CompleteFetch($fetch);
-					$fetch = $this->AlterChange($put_fetch, $input);
+					$data = $this->AlterChange($data, $input);
 					break;
 			}
+			
 		}
 		
+		switch (\Core\Router::$mode) {
+			case \Core\Router::MODE_JSON:
+				$format = "json";
+				break;
+			default:
+				$format = "html";
+				break;
+		}
 		
-
-		$this->Output($fetch);
+		$view_vars = array("num_rows"=>$num_rows, "controller"=>$this, "data"=>$data, "class"=>$class, "table"=>$class::getTable());
+		
+		//Find the view we're looking for
+		if (\Core\Router::hasView($v = "api/{$format}/{$class::getTable()}/{$view_type}/{$view}/{$this->disposition}")) {
+			\Core\Router::loadView($v, $view_vars);
+		//Fallback to the generic view if we can
+		} elseif (\Core\Router::hasView($v = "api/{$format}/_generic/{$view_type}/{$view}/{$this->disposition}")) {
+			\Core\Router::loadView($v, $view_vars);
+		//Fallback to the default view
+		} elseif (\Core\Router::hasView($v = "api/{$format}/{$class::getTable()}/{$view_type}/{$default_view}/{$this->disposition}")) {
+			\Core\Router::loadView($v, $view_vars);
+		//Get the full default view
+		} else {
+			\Core\Router::loadView("api/{$format}/_generic/{$view_type}/{$default_view}/full", $view_vars);
+		}
 	}
-	
+
 	/**
-	 * 
+	 *
 	 */
 	protected function add() {
 		$c = static::getModelClass();
@@ -100,7 +141,7 @@ abstract class ModelController extends \Controller\BaseController {
 			if (substr($key, 0, 4) == "__X_") {
 				$_SERVER['HTTP_X_'.substr($key, 4)] = $value;
 			}
-			
+				
 			if (substr($key, 0, 2) == "__") {
 				$keyb = substr($key, 2);
 				$proto[$keyb] = $value;
@@ -110,7 +151,7 @@ abstract class ModelController extends \Controller\BaseController {
 		unset($_GET['_pjax']);
 		return $proto;
 	}
-	
+
 	protected function ConditionalRequest() {
 		if ($this->protocol['where']) {
 			$conditions = json_decode($this->protocol['where']);
@@ -129,17 +170,7 @@ abstract class ModelController extends \Controller\BaseController {
 	}
 
 	protected function Input() {
-		//switch (\Core\Router::$mode) {
-		//	case \Core\Router::MODE_XML:
-		//		$data = self::InputXML();
-		//		break;
-		//	case \Core\Router::MODE_JSON:
-		//		$data = self::InputJSON();
-		//		break;
-		//	default:
-				$data = self::InputHTTP();
-		//		break;
-		//}
+		$data = self::InputHTTP();
 		return $data;
 	}
 
@@ -158,92 +189,7 @@ abstract class ModelController extends \Controller\BaseController {
 		return $d;
 	}
 
-	protected function InputJSON() {
-		$rawdata = json_decode(file_get_contents("php://input"));
-		$d = new DataStream();
-		foreach ($rawdata as $key=>$data) {
-			if (substr($key, 0, 2) == "__") {
-				$d->protocol[substr($key, 2)] = $data;
-				unset($rawdata[$key]);
-			}
-		}
-		if ($rawdata != null) {
-			$d->data = $rawdata;
-		}
-		var_dump($_POST, $d);
-		return $d;
-
-	}
-
-	protected function InputXML() {
-		$rawdata = \System\Library\StdLib::xml2object(file_get_contents("php://input"));
-		$d = new DataStream();
-		foreach ($_POST as $key=>$data) {
-			if (substr($key, 0, 2) == "__") {
-				$d->protocol[substr($key, 2)] = $data;
-				unset($rawdata[$key]);
-			}
-		}
-		$d->data = $rawdata;
-		return $d;
-	}
-
-	protected function Output($fetch) {
-		switch (\Core\Router::$mode) {
-			case \Core\Router::MODE_XML:
-				self::OutputXML($fetch);
-				break;
-			case \Core\Router::MODE_JSON:
-				self::OutputJSON($fetch);
-				break;
-			default:
-				self::OutputHTTP($fetch);
-				break;
-		}
-	}
-	protected function OutputHTTP($d) {
-		$c = $this->getModelClass();
-		$table = $c::getTable();
-		if (is_a($d, "\Library\Database\LinqSelect")) {
-			switch ($_SERVER['HTTP_X_DISPOSITION']) {
-				case "modal":
-					$view = "/list/modal";
-					break;
-				default:
-					$view = "/list/full";
-					break;
-			}
-		} elseif ($this->protocol['edit']) {
-			switch ($_SERVER['HTTP_X_DISPOSITION']) {
-				case "modal":
-					$view = "/edit/modal";
-					break;
-				default:
-					$view = "/edit/full";
-					break;
-			}
-		} else {
-			switch ($_SERVER['HTTP_X_DISPOSITION']) {
-				case "modal":
-					$view = "/view/modal";
-					break;
-				default:
-					$view = "/view/full";
-					break;
-			}
-		}
-		if (\Core\Router::hasView("api/{$table}{$view}")) {
-			\Core\Router::loadView("api/{$table}{$view}", array("table"=>$table, "class"=>$c, "data"=>$d, "controller"=>$this));
-		} else {
-			\Core\Router::loadView("api/_generic{$view}", array("table"=>$table, "class"=>$c, "data"=>$d, "controller"=>$this));
-			
-		}
-		
-		
-		if ($d->protocol['redirect']) {
-			header("Location: ".$d->protocol['redirect']);
-		}
-	}
+	
 
 	protected function OutputJSON($fetch) {
 		$fetch = $this->CompleteFetch($fetch);
@@ -254,9 +200,6 @@ abstract class ModelController extends \Controller\BaseController {
 		echo json_encode($fetch);
 	}
 
-	protected function OutputXML() {
-
-	}
 
 	protected function Fetch($id=false) {
 		$class = $this->getModelClass();
@@ -273,9 +216,9 @@ abstract class ModelController extends \Controller\BaseController {
 
 	protected function FetchRequest($search, $fuzzy=true) {
 		$class = $this->getModelClass();
-		
-		
-		
+
+
+
 		$ids = array();
 		$db = $class::getDB();
 		$select = $db->Select($class);
@@ -313,15 +256,15 @@ abstract class ModelController extends \Controller\BaseController {
 		$select->setFilter($and);
 		$this->query = $select;
 		return $select;
-		
-		
+
+
 	}
-	
+
 	protected function CompleteFetch($select) {
 		$class = static::getModelClass();
 		$key = $class::getPrimaryKey()[0];
 		$out = array();
-		foreach ($select->Exec() as $row) {
+		foreach ($select as $row) {
 			$out[] = new $class($row[$key]);
 		}
 		return $out;

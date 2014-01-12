@@ -1,23 +1,16 @@
 <?php
-$r = $controller->query->getResult();
-$total_rows = $r->num_rows;
-$r->free_result();
-
-$table = $controller->table;
-
-$controller->query->setLimit($controller->current_page*$controller->page_size, $controller->page_size);
-$rows = $controller->query->Exec();
+$rows = $controller->data;
+$class = $controller->class;
 ?>
 <div class="pull-right col-sm-4">
 	<?php 
-	$se = new \Library\Widget\SearchExpression($controller->table);
+	$se = new \Library\Widget\SearchExpression($class);
 	foreach ($controller->columns as $column) {
-		$se->addColumn($column[0], $column[1]);
+		if ($column[3]) {
+			$se->addColumn($column[0], $column[1]);
+		}
 	}
-	
-	foreach ($controller->filter->fields as $field) {
-		$se->filters[] = array($field[0], $field[1], $field[2]);
-	}
+	$se->filters = $controller->filters;
 	$se->Render();
 
 	$where_string = json_encode($se->filters);
@@ -38,8 +31,8 @@ $rows = $controller->query->Exec();
 <tbody>
 <?php
 foreach ($rows as $row) {
-	$key = $table::getPrimaryKey()[0];
-	$row = new $table($row[$key]);
+	$key = $class::getPrimaryKey()[0];
+	$row = new $class($row[$key]);
 	?>
 <tr>
 	<?php 
@@ -48,7 +41,7 @@ foreach ($rows as $row) {
 		<td><?php
 		if ($column[2]) {
 		?>
-		<a href="/api/<?php echo $table::getTable() ?>/<?php echo $row->$key ?>.html" data-modal-result="<?php echo $row->$key ?>">
+		<a href="/api/<?php echo $class::getTable() ?>/<?php echo $row->$key ?>.html" data-modal-result="<?php echo $row->$key ?>">
 		<?php
 		}
 		$widget = $row->getWidgetByField($column[1]);
@@ -75,6 +68,7 @@ foreach ($rows as $row) {
 <?php 
 $first_page = $controller->current_page-2;
 $last_page = $first_page+4;
+$total_rows = $controller->num_rows;
 
 $total_pages = ceil($total_rows/$controller->page_size);
 
@@ -96,7 +90,7 @@ if ($total_pages < 5) {
 $query = array();
 $query['__where'] = $where_string;
 $query['__X_PAGE'] = 0;
-$url  = "/api/".$table::getTable().".html?";
+$url  = "/api/".$class::getTable().".html?";
 ?>
 <ul class="pagination">
 	<!-- BACK ARROW -->

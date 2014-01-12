@@ -170,7 +170,9 @@ abstract class Router {
 	}
 	
 	public static function hasView($routerViewObscuratedVariableToAvoidCollision) {
-		return file_exists(BOILER_LOCATION."application/view/$routerViewObscuratedVariableToAvoidCollision.php");
+		return
+			file_exists(BOILER_LOCATION."application/view/$routerViewObscuratedVariableToAvoidCollision.php")
+			|| file_exists(BOILER_LOCATION."system/view/$routerViewObscuratedVariableToAvoidCollision.php");
 	}
 
 	public static function getView($view, $variables=array(), $system=false) {

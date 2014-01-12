@@ -2,51 +2,29 @@
 namespace Library\Widget;
 
 class APITable {
-	public $table;
+	public $class;
 	
 	public $columns = array();
 	
-	public $query;
-	public $filter;
+	public $data;
 	
 	public $page_size = 10;
 	public $current_page = 0;
+	public $num_rows = 0;
+	
+	public $filters = array();
 	
 	public function __construct($class) {
-		$this->table = $class;
+		$this->class = $class;
 		$db = $class::getDB();
 		$this->query = $db->Select($class);
-		$this->filter = $this->query->getAndFilter();
 	}
 	
-	public function setQuery($query) {
-		$this->query = $query;
-		$this->filter = $this->query->filter;
-	}
-	
-	public function addColumn($name, $column, $link=false, $search=true) {
-		$this->columns[] = array($name, $column, $link, $search);
-		$this->query->addField($column);
-	}
-	
-	public function getFilter() {
-		return $this->filter;
-	}
-	
-	public function setFilter(\Library\Database\LinqEquality $eq) {
-		$this->filter = $eq;
-	}
-	
-	public function setPageSize($size) {
-		$this->page_size = $size;
-	}
-	
-	public function setCurrentPage($page) {
-		$this->current_page = $page;
+	public function addColumn($name, $column, $link=false, $search=true, $show=true) {
+		$this->columns[] = array($name, $column, $link, $search, $show);
 	}
 	
 	public function Render() {
-		$this->query->setFilter($this->filter);
 		\Core\Router::loadView("widget/apitable", array("controller"=>$this));
 	}
 }

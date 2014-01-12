@@ -1,8 +1,7 @@
 <?php 
-$table = $controller->table;
-
+$class = $controller->class;
 ?>
-<div class="search-control" data-url="/api/<?php echo $table::getTable() ?>.html" id="<?php echo $controller->id ?>">
+<div class="search-control" data-url="/api/<?php echo $class::getTable() ?>.html" id="<?php echo $controller->id ?>">
 	<div class="input-group">
       <div class="form-control fake-control"><?php 
       foreach ($controller->filters as $filter) {
@@ -37,8 +36,8 @@ $table = $controller->table;
 			<select class="form-control form-equality">
 				<?php 
 				if (
-$table::getWidgetTypeByColumn($column[1]) == \Library\Widget\Widget::NUMERIC
-				|| $table::getWidgetTypeByColumn($column[1]) == \Library\Widget\Widget::DATE
+$class::getWidgetTypeByColumn($column[1]) == \Library\Widget\Widget::NUMERIC
+				|| $class::getWidgetTypeByColumn($column[1]) == \Library\Widget\Widget::DATE
 ) {
 					?>
 				<option value=">">&gt;</option>
@@ -63,7 +62,7 @@ $table::getWidgetTypeByColumn($column[1]) == \Library\Widget\Widget::NUMERIC
 			</div>
 			<div class="form-group form-widget">
 			<?php 
-			$widget = $table::getWidgetByColumn($column[0]);
+			$widget = $class::getWidgetByColumn($column[0]);
 			$widget->Render();
 			?>
 			</div>

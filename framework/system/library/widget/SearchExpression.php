@@ -4,15 +4,15 @@ namespace Library\Widget;
 class SearchExpression {
 	public $columns;
 	
-	public $table;
+	public $class;
 	
 	public $filters  = array();
 	
 	public $id;
 	
-	public function __construct($table) {
+	public function __construct($class) {
 		$this->id = uniqid("search-expression-");
-		$this->table = $table;
+		$this->class = $class;
 	}
 	
 	public function addColumn($name, $field) {
