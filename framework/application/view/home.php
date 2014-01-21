@@ -1,7 +1,10 @@
 <div class="container">
 WELCOME TO YOUR HOME PAGE
 <?php 
-include BOILER_LOCATION."/application/model/*";
+$dir = opendir(BOILER_LOCATION."/application/model/");
+while ($d = readdir($dir)) {
+	include BOILER_LOCATION."/application/model/$d";
+}
 ?>
 <ul>
 <?php
