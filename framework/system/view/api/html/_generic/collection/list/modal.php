@@ -5,7 +5,7 @@
         <h4 class="modal-title">List <?php echo $table ?></h4>
       </div>
       <div class="modal-body">
-		<a class="btn btn-success" href="/api/<?php echo $table ?>/add">Add</a>
+		<a class="btn btn-success" href="/<?php echo $table ?>/add">Add</a>
         <?php 
 $t = new \Library\Widget\APITable($class);
 $t->page_size = $controller->page_size;

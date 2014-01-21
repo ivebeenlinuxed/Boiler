@@ -132,7 +132,7 @@ abstract class ModelController extends \Controller\BaseController {
 		$c = static::getModelClass();
 		$key = $c::getPrimaryKey()[0];
 		$obj = $c::Create();
-		header("Location: /api/{$c::getTable()}/{$obj->$key}?__edit=1");
+		header("Location: /{$c::getTable()}/{$obj->$key}?__edit=1");
 	}
 
 	protected function ProtocolRequest() {
@@ -148,7 +148,6 @@ abstract class ModelController extends \Controller\BaseController {
 				unset($_GET[$key]);
 			}
 		}
-		unset($_GET['_pjax']);
 		return $proto;
 	}
 
@@ -159,6 +158,9 @@ abstract class ModelController extends \Controller\BaseController {
 			$conditions = array();
 		}
 		foreach ($_GET as $key=>$data) {
+			if ($key == "_pjax") {
+				continue;
+			}
 			$conditions[] = array($key, "LIKE", "%".$data."%");
 		}
 		return $conditions;

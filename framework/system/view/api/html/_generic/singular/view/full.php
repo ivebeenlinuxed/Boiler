@@ -5,20 +5,20 @@ if (!isset($edit_mode)) {
 $table = $class;
 $key = $table::getPrimaryKey()[0];
 ?>
-<div class="api api-full api-view">
+<div class="api api-full api-view container main-margin">
 	<ol class="breadcrumb">
 	  <li><a href="/">Home</a></li>
-	  <li><a href="/api/<?php echo $table::getTable() ?>">List <?php echo $table::getTable() ?></a></li>
+	  <li><a href="/<?php echo $table::getTable() ?>">List <?php echo $table::getTable() ?></a></li>
 	  <li class="active"><?php echo ($edit_mode? "Edit" : "View")." #".$data->$key ?></li>
 	</ol>
 	<?php
 	if (!$edit_mode) {
 	?>
-	<a href="/api/<?php echo $table::getTable() ?>/<?php echo $data->$key ?>/edit" class="btn btn-success pull-right">Edit</a>
+	<a href="/<?php echo $table::getTable() ?>/<?php echo $data->$key ?>/edit" class="btn btn-success pull-right">Edit</a>
 	<?php
 	} else {
 	?>
-	<a href="/api/<?php echo $table::getTable() ?>/<?php echo $data->$key ?>" class="btn btn-success pull-right">Save</a>
+	<a href="/<?php echo $table::getTable() ?>/<?php echo $data->$key ?>" class="btn btn-success pull-right">Save</a>
 	<?php
 	}
 	?>
