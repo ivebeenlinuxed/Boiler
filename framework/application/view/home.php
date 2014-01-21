@@ -1,3 +1,4 @@
+<div class="container">
 WELCOME TO YOUR HOME PAGE
 <?php 
 include BOILER_LOCATION."/application/model/*";
@@ -11,3 +12,4 @@ foreach (get_declared_classes() as $class) {
 }
 ?>
 </ul>
+</div>
