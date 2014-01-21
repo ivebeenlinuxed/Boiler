@@ -3,7 +3,9 @@ WELCOME TO YOUR HOME PAGE
 <?php 
 $dir = opendir(BOILER_LOCATION."/application/model/");
 while ($d = readdir($dir)) {
-	include BOILER_LOCATION."/application/model/$d";
+	if (!class_exists(\System\Library\Lexical::getClassName(substr($d, 0, -4)))) {
+		include BOILER_LOCATION."/application/model/$d";
+	}
 }
 ?>
 <ul>
