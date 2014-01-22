@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="My Project" default="build">
 	<property name="cmd.doxygen" value="/usr/bin/doxygen" />
-	<property name="db" value="urban_walks" />
-	<property name="db_user" value="urban-walks" />
-	<property name="db_password" value="urbanwalkspasswd123=" />
+	<property name="db" value="database_name" />
+	<property name="db_user" value="database_user" />
+	<property name="db_password" value="database_password" />
+	<property name="db_server" value="localhost" />
+	<property name="db_port" value="3306" />
 
 	<target name="build" depends="db-config" />
 	<target name="test" depends="docs,phpunit,phpcpd,phpmd,phpcs,skelgen" />

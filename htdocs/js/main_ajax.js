@@ -1,5 +1,9 @@
 
+
 $(document).ready(function() {
+	//$.pjax.defaults.timeout = 1000;
+
+
 	$("body").delegate("[data-type='modal']", "click", function(e) {
 		e.preventDefault();
 		fireAPIModal($(this).attr("href"));
@@ -35,13 +39,30 @@ $(document).ready(function() {
 		}
 	});
 	
-	$(document).pjax(".side-menu a", '#main-container');
+	//$(document).pjax("a:not([data-type='api-modal'])", '#main-container');
 	
-	$("body").delegate("#main-container a:not([data-type='api-modal'])", "click", function(e) {
+	//$(document).pjax(".side-menu a", '#main-container');
+	var pjax;
+	$("body").delegate("a:not([data-type='api-modal'])", "click", function(e) {
 		e.preventDefault();
-		$.pjax.click(e, {container: "#main-container"});
+		if (pjax && pjax.state != 4) {
+			pjax.abort();
+		}
+		pjax = $.ajax({
+			url: $(this).attr("href"),
+			timeout: 1000,
+			success: function(data) {
+				$("#main-container").html(data);
+				window.history.replaceState({}, document.title, this.url);
+			},
+			error: function() {
+				window.location = this.url;
+			}
+		});
+		//$.pjax.click(e, {container: "#main-container"});
 		//$(document).pjax('a', '#pjax-container');
 	});
+	
 });
 
 api_return = null;

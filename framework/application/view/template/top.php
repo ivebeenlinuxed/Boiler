@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Lichfield Online</title>
+<title>Boiler Data</title>
 <link rel="stylesheet" type="text/css" href="/plugins/bootstrap/css/bootstrap.min.css" />
 <link rel="stylesheet" type="text/css" href="/css/main.css" />
 <link rel="stylesheet" type="text/css" href="/plugins/font-awesome-4.0.3/css/font-awesome.min.css" />

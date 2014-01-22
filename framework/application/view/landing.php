@@ -1,5 +1,5 @@
 <?php
-if (!isset($_GET['_pjax'])) {
+if ($_SERVER['HTTP_X_REQUESTED_WITH'] != "XMLHttpRequest") {
 \Core\Router::loadView("template/top");
 ?>
 <div id="main-container">
@@ -22,7 +22,7 @@ if (!isset($_GET['_pjax'])) {
 	} else {
 		\Core\Router::loadView("home");
 	}
-if (!isset($_GET['_pjax'])) {
+if ($_SERVER['HTTP_X_REQUESTED_WITH'] != "XMLHttpRequest") {
 	?>
 </div>
 <?php

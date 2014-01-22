@@ -50,11 +50,11 @@ $("body").delegate(".search-control button.form-btn-search", "click", function(e
 	});
 	query = new Object();
 	query.__where = JSON.stringify(where_expr);
-	if ($(this).closest("#main_container").length > 0) {
+	if ($(this).closest("#main-container").length > 0) {
 		$.ajax({
 			url: ctrl.attr("data-url")+"?"+build_http_query(query),
 			success: function(html) {
-				$("#main_container").html(html);
+				$("#main-container").html(html);
 			}
 		});
 	} else {
