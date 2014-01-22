@@ -128,10 +128,10 @@ abstract class ModelController extends \Controller\BaseController {
 	/**
 	 *
 	 */
-	protected function add() {
+	public function add() {
 		$c = static::getModelClass();
 		$key = $c::getPrimaryKey()[0];
-		$obj = $c::Create();
+		$obj = $c::Create(array());
 		header("Location: /{$c::getTable()}/{$obj->$key}?__edit=1");
 	}
 
