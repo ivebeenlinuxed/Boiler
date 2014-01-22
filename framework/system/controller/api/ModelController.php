@@ -132,7 +132,7 @@ abstract class ModelController extends \Controller\BaseController {
 		$c = static::getModelClass();
 		$key = $c::getPrimaryKey()[0];
 		$obj = $c::Create(array());
-		header("Location: /{$c::getTable()}/{$obj->$key}?__edit=1");
+		header("Location: /{$c::getTable()}/{$obj->$key}/edit");
 	}
 
 	protected function ProtocolRequest() {
