@@ -25,13 +25,21 @@ abstract class ModelController extends \Controller\BaseController {
 
 	protected abstract function getModelClass();
 
+	public function __construct() {
+		//PUT requests need to be processed manually
+		if ($_SERVER['REQUEST_METHOD'] == "PUT") {
+			foreach ($this->parse_raw_http_request() as $block) {
+				$_POST[$block['name']] = $block['block'];
+			}
+		}
+	}
+	
 	public function index($id=false, $view=false) {
 		// Underscored advanced data needs to be removed, before the novices get their turn
 		$this->protocol = $this->ProtocolRequest();
 		
 		// Standard REST data processed
 		$this->searchParams = $this->ConditionalRequest();
-		
 		// Get the class we're going to be working with
 		$class = static::getModelClass();
 		
@@ -48,11 +56,11 @@ abstract class ModelController extends \Controller\BaseController {
 			$this->disposition = $_SERVER['HTTP_X_DISPOSITION'];
 		}
 		
-		//PUT requests need to be processed manually
-		if ($_SERVER['REQUEST_METHOD'] == "PUT") {
-			foreach ($this->parse_raw_http_request() as $block) {
-				$_POST[$block['name']] = $block['block'];
-			}
+		
+		
+		
+		if ($_SERVER['HTTP_X_REQUEST_METHOD']) {
+			$_SERVER['REQUEST_METHOD'] = $_SERVER['HTTP_X_REQUEST_METHOD'];
 		}
 		
 		//Create before deciding which view to use
@@ -63,9 +71,17 @@ abstract class ModelController extends \Controller\BaseController {
 			$key = $class::getPrimaryKey()[0];
 			$id = $data->$key;
 		}
+		
+		if ($_SERVER['REQUEST_METHOD'] == "DELETE") {
+			$data = $class::Fetch($id);
+			$this->AlterDelete($data);
+			$id = false;
+		}
 
 		
 		if ($id === false || ((int)$id == 0 && $id != "0")) {
+			$view = $id;
+			$id = false;
 			//Get the default collection view;
 			$view_type = "collection";
 			$default_view = "list";
@@ -76,6 +92,7 @@ abstract class ModelController extends \Controller\BaseController {
 			$qData->free_result();
 			$data->setLimit($this->page*$this->page_size, $this->page_size);
 			$data = $data->Exec();
+			$data = $this->CompleteFetch($data);
 		} else {
 			//Get the default views setup
 			$view_type = "singular";
@@ -86,15 +103,9 @@ abstract class ModelController extends \Controller\BaseController {
 			
 			//Object
 			$data = $class::Fetch($id);
-			switch ($_SERVER['REQUEST_METHOD']) {
-				case "DELETE":
-					$this->AlterDelete($data);
-					$data = false;
-					break;
-				case "PUT":
-					$input = $this->Input();
-					$data = $this->AlterChange($data, $input);
-					break;
+			if ($_SERVER['REQUEST_METHOD'] == "PUT") {
+				$input = $this->Input();
+				$data = $this->AlterChange($data, $input);
 			}
 			
 		}
@@ -108,6 +119,9 @@ abstract class ModelController extends \Controller\BaseController {
 				break;
 		}
 		
+		if ($view == false) {
+			$view = $default_view;
+		}
 		$view_vars = array("num_rows"=>$num_rows, "controller"=>$this, "data"=>$data, "class"=>$class, "table"=>$class::getTable());
 		
 		//Find the view we're looking for
@@ -132,7 +146,7 @@ abstract class ModelController extends \Controller\BaseController {
 		$c = static::getModelClass();
 		$key = $c::getPrimaryKey()[0];
 		$obj = $c::Create(array());
-		header("Location: /{$c::getTable()}/{$obj->$key}/edit");
+		header("Location: /{$c::getTable()}/{$obj->$key}?__edit=1");
 	}
 
 	protected function ProtocolRequest() {
@@ -219,8 +233,6 @@ abstract class ModelController extends \Controller\BaseController {
 	protected function FetchRequest($search, $fuzzy=true) {
 		$class = $this->getModelClass();
 
-
-
 		$ids = array();
 		$db = $class::getDB();
 		$select = $db->Select($class);
@@ -262,7 +274,7 @@ abstract class ModelController extends \Controller\BaseController {
 
 	}
 
-	protected function CompleteFetch($select) {
+	public function CompleteFetch($select) {
 		$class = static::getModelClass();
 		$key = $class::getPrimaryKey()[0];
 		$out = array();
@@ -297,10 +309,10 @@ abstract class ModelController extends \Controller\BaseController {
 	}
 
 	protected function AlterCreate($input) {
-		return $this->CreateRequest($input->data);
+		return $this->__CreateRequest($input->data);
 	}
 
-	protected function CreateRequest($fields) {
+	public function __CreateRequest($fields) {
 		$class = $this->getModelClass();
 		return $class::Create($fields);
 	}
