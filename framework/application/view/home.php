@@ -1,10 +1,12 @@
 <div class="container">
 <h1>Welcome to Boiler:Data</h1>
 <p>Boiler:Data is the AJAX framework designed for data hackers. It's special because it does all the coding for you!</p>
-<p>To begin do the following</p>
+<p>Also, because it's built on Boiler, it's fast, easy to manipulate and easy to extend!</p>
+<p>To begin just follow these simple steps</p>
 <ol>
 	<li>Clone the repo: git clone https://github.com/ivebeenlinuxed/Boiler.git</li>
-	<li>Build the config file: ant build</li>
+	<li>Point your webserver to [project_root]/htdocs (make sure .htaccess rewrite is on)</li>
+	<li>Build the config file: ant build (you may need to install 'ant')</li>
 	<li>Edit the config file config.php in your favourite editor</li>
 	<li>Get Boiler to build all of your models for you: ant models</li>
 	<li>Get Boiler to build all your API for you: ant api</li>
