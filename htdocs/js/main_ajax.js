@@ -1,23 +1,46 @@
 
-
 $(document).ready(function() {
-	//$.pjax.defaults.timeout = 1000;
-
-
-	$("body").delegate("[data-type='modal']", "click", function(e) {
+	$("body").delegate("[data-type='api-modal']", "click", function(e) {
 		e.preventDefault();
 		fireAPIModal($(this).attr("href"));
-		return;
+		if ($(this).attr("data-modal-return")) {
+			api_return = $(this).attr("data-modal-return");
+		} else {
+			api_return = null;
+		}
+	});
+	
+	$("body").delegate("[data-type='modal']", "click", function(e) {
+		//FIXME Depreciate
+		e.preventDefault();
+		fireAPIModal($(this).attr("href"));
+		if ($(this).attr("data-modal-return")) {
+			api_return = $(this).attr("data-modal-return");
+		} else {
+			api_return = null;
+		}
+	});
+	
+	$("body").delegate("[data-type='api-notification']", "click", function(e) {
+		e.preventDefault();
 		$.ajax({
 			url: $(this).attr("href"),
+			headers: {"X-Disposition": "notification"},
 			dataType: "json",
-			headers: {
-				"X-Disposition":"modal"
-			},
-			success: function(json) {
-				$("body").append(json.html);
-				console.log($("#"+json.component_id));
-				$("#"+json.component_id).modal('show');
+			success: function(data) {
+				for (n in data) {
+					note = {iconClass: 'toast-error', message: data[n].message, title: data[n].title, timeout: data[n].timeout};
+					if (data[n].priority == E_ERROR) {
+						note.iconClass = 'toast-error';
+						note.optionsOverride = {tapToDismiss: false};
+					} else if (data[n].priority == E_WARNING) {
+						note.iconClass = 'toast-warning';
+					} else  if (data[n].priority == E_NOTICE) {
+						note.iconClass = 'toast-info';
+					}
+					toastr.options.timeOut = data[n].timeout;
+					note = toastr.notify(note);
+				}
 			}
 		});
 	});
@@ -27,7 +50,6 @@ $(document).ready(function() {
 			e.preventDefault();
 			fireAPIModal($(this).attr("href"));
 		}
-		//$(document).pjax('a', '#pjax-container');
 	});
 
 	$("body").delegate("#api-modal [data-modal-result]", "click", function(e) {
@@ -39,44 +61,18 @@ $(document).ready(function() {
 		}
 	});
 	
-	//$(document).pjax("a:not([data-type='api-modal'])", '#main-container');
+	$(document).pjax(".side-menu a", '#main-container');
 	
-	//$(document).pjax(".side-menu a", '#main-container');
-	var pjax;
-	$("body").delegate("a:not([data-type='api-modal'])", "click", function(e) {
+	$("body").delegate("#main-container a:not([data-type='api-modal'], [data-type='api-notification'])", "click", function(e) {
 		e.preventDefault();
-		if (pjax && pjax.state != 4) {
-			pjax.abort();
-		}
-		pjax = $.ajax({
-			url: $(this).attr("href"),
-			timeout: 1000,
-			success: function(data) {
-				$("#main-container").html(data);
-				window.history.replaceState({}, document.title, this.url);
-			},
-			error: function() {
-				window.location = this.url;
-			}
-		});
-		//$.pjax.click(e, {container: "#main-container"});
+		$.pjax.click(e, {container: "#main-container"});
 		//$(document).pjax('a', '#pjax-container');
 	});
-	
 });
 
 api_return = null;
 
 $(document).ready(function() {
-	$("body").delegate("[data-type='api-modal']", "click", function(e) {
-		e.preventDefault();
-		fireAPIModal($(this).attr("href"));
-		if ($(this).attr("data-modal-return")) {
-			api_return = $(this).attr("data-modal-return");
-		} else {
-			api_return = null;
-		}
-	});
 });
 
 function fireAPIModal(url) {
