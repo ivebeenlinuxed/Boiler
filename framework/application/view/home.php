@@ -133,7 +133,7 @@ foreach (get_declared_classes() as $class) {
 			continue;
 		}
 		
-		echo "<td><a href='/{$class::getTable()}.html?__where=%5B%5B%22id%22%2C%22!%3D%22%2C%221%22%5D%5D'>/{$class::getTable()}?__where=['id', '!=', 1]</a></td>";
+		echo "<td><a href='/{$class::getTable()}.html?__where=%5B%5B%22id%22%2C%22!%3D%22%2C%221%22%5D%5D'>/{$class::getTable()}?__where=[['id', '!=', 1]]</a></td>";
 		break;
 	}
 }
