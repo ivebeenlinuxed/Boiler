@@ -6,11 +6,13 @@
       </div>
       <div class="modal-body">
 		<a class="btn btn-success" href="/<?php echo $table ?>/add">Add</a>
-        <?php 
+<?php 
 $t = new \Library\Widget\APITable($class);
 $t->page_size = $controller->page_size;
 $t->current_page = $controller->page;
-$t->setQuery($controller->query);
+$t->data = $data;
+$t->filters = $controller->searchParams;
+$t->num_rows = $num_rows;
 
 $key = $class::getPrimaryKey()[0];
 

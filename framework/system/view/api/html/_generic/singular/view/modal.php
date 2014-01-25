@@ -29,7 +29,7 @@ $key = $table::getPrimaryKey()[0];
 			if (!$edit_mode) {
 	?>
 			<a
-				href="/<?php echo $table::getTable() ?>/<?php echo $data->$key ?>?__edit=1"
+				href="/<?php echo $table::getTable() ?>/<?php echo $data->$key ?>/edit"
 				class="btn btn-success pull-right">Edit</a>
 			<?php
 	} else {
@@ -45,6 +45,7 @@ $key = $table::getPrimaryKey()[0];
 				#
 				<?php echo $data->$key ?>
 			</h2>
+			<div class="form-horizontal">
 			<?php 
 			foreach ($table::getDBColumns() as $col) {
 	?>
@@ -62,6 +63,7 @@ $key = $table::getPrimaryKey()[0];
 			<?php 
 	}
 	?>
+			</div>
 		</div>
 	</div>
 </div>

@@ -9,6 +9,7 @@
 <script type="text/javascript" src="/plugins/jquery/jquery-1.9.1.min.js"></script>
 
 <link rel="stylesheet" type="text/css" href="/plugins/boiler/widget/search_expression/search_expression.css" />
+<link rel="stylesheet" type="text/css" href="/css/maxi-modal.css" />
 </head>
 <body>
 	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
