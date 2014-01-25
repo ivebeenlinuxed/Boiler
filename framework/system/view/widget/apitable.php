@@ -32,7 +32,7 @@ $class = $controller->class;
 <?php
 foreach ($rows as $row) {
 	$key = $class::getPrimaryKey()[0];
-	$row = new $class($row[$key]);
+	$row = new $class($row->$key);
 	?>
 <tr>
 	<?php 
@@ -41,7 +41,7 @@ foreach ($rows as $row) {
 		<td><?php
 		if ($column[2]) {
 		?>
-		<a href="/<?php echo $class::getTable() ?>/<?php echo $row->$key ?>.html" data-modal-result="<?php echo $row->$key ?>">
+		<a href="/api/<?php echo $class::getTable() ?>/<?php echo $row->$key ?>.html" data-modal-result="<?php echo $row->$key ?>">
 		<?php
 		}
 		$widget = $row->getWidgetByField($column[1]);
@@ -90,7 +90,7 @@ if ($total_pages < 5) {
 $query = array();
 $query['__where'] = $where_string;
 $query['__X_PAGE'] = 0;
-$url  = "/".$class::getTable().".html?";
+$url  = "/api/".$class::getTable().".html?";
 ?>
 <ul class="pagination">
 	<!-- BACK ARROW -->

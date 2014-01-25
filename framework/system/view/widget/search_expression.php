@@ -1,7 +1,7 @@
 <?php 
 $class = $controller->class;
 ?>
-<div class="search-control" data-url="/<?php echo $class::getTable() ?>.html" id="<?php echo $controller->id ?>">
+<div class="search-control" data-url="/api/<?php echo $class::getTable() ?>.html" id="<?php echo $controller->id ?>">
 	<div class="input-group">
       <div class="form-control fake-control"><?php 
       foreach ($controller->filters as $filter) {

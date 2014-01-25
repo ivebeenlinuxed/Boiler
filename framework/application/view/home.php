@@ -160,7 +160,15 @@ foreach (get_declared_classes() as $class) {
 </tr>
 <tr>
 	<th>Request Method (e.g. PUT,DELETE,GET,POST)</th>
-	<td>?__X_* (Where headers cannot be sent nicely - such as an HTML anchor tag)</td>
+	<td>X-Request-Method: PUT</td>
+</tr>
+<tr>
+	<th>Order By</th>
+	<td>X-Order-By: id+, name- (Not yet implemented)</td>
+</tr>
+<tr>
+	<th>Show only fields id and name</th>
+	<td>X-Fields: id, name (Not yet implemented)</td>
 </tr>
 </table>
 

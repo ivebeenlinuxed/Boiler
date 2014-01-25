@@ -19,7 +19,7 @@ $key = $table::getPrimaryKey()[0];
 			<ol class="breadcrumb">
 				<li><a href="/">Home</a>
 				</li>
-				<li><a href="/<?php echo $table::getTable() ?>">List <?php echo $table::getTable() ?>
+				<li><a href="/api/<?php echo $table::getTable() ?>">List <?php echo $table::getTable() ?>
 				</a>
 				</li>
 				<li class="active"><?php echo ($edit_mode? "Edit" : "View")." #".$data->$key ?>
@@ -29,13 +29,13 @@ $key = $table::getPrimaryKey()[0];
 			if (!$edit_mode) {
 	?>
 			<a
-				href="/<?php echo $table::getTable() ?>/<?php echo $data->$key ?>/edit"
+				href="/api/<?php echo $table::getTable() ?>/<?php echo $data->$key ?>/edit"
 				class="btn btn-success pull-right">Edit</a>
 			<?php
 	} else {
 	?>
 			<a
-				href="/<?php echo $table::getTable() ?>/<?php echo $data->$key ?>"
+				href="/api/<?php echo $table::getTable() ?>/<?php echo $data->$key ?>"
 				class="btn btn-success pull-right">Save</a>
 			<?php
 	}
@@ -63,7 +63,7 @@ $key = $table::getPrimaryKey()[0];
 			<?php 
 	}
 	?>
-			</div>
+	</div>
 		</div>
 	</div>
 </div>
