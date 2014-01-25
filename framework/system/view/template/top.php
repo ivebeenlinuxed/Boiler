@@ -4,12 +4,12 @@
 <meta charset="UTF-8" />
 <title>Boiler Data</title>
 <link rel="stylesheet" type="text/css" href="/plugins/bootstrap/css/bootstrap.min.css" />
-<link rel="stylesheet" type="text/css" href="/css/main.css" />
+<link rel="stylesheet" type="text/css" href="/plugins/boiler/css/main.css" />
 <link rel="stylesheet" type="text/css" href="/plugins/font-awesome-4.0.3/css/font-awesome.min.css" />
 <script type="text/javascript" src="/plugins/jquery/jquery-1.9.1.min.js"></script>
 
 <link rel="stylesheet" type="text/css" href="/plugins/boiler/widget/search_expression/search_expression.css" />
-<link rel="stylesheet" type="text/css" href="/css/maxi-modal.css" />
+<link rel="stylesheet" type="text/css" href="/plugins/boiler/css/maxi-modal.css" />
 </head>
 <body>
 	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
