@@ -19,6 +19,8 @@ abstract class Router {
 	const MODE_PNG = 4;
 	const MODE_SVG = 5;
 	const MODE_GIF = 6;
+	const MODE_JS = 7;
+	const MODE_CSS = 8;
 	
 	public static $mode;
 
@@ -58,7 +60,7 @@ abstract class Router {
 	 * @param array $controllerArray
 	*/
 	public static function getController($array) {
-		preg_match("/[a-zA-Z0-9_]+(\.(?<extension>html|json|xml|jpg|png|svg|gif))?/", $array[count($array)-1], $matches);
+		preg_match("/[a-zA-Z0-9_]+(\.(?<extension>html|json|xml|jpg|png|svg|gif|js|css))?/", $array[count($array)-1], $matches);
 		if (isset($matches['extension'])) {
 			switch ($matches['extension']) {
 				case "json":
@@ -81,6 +83,12 @@ abstract class Router {
 					break;
 				case "gif":
 					self::$mode = self::MODE_GIF;
+					break;
+				case "js":
+					self::$mode = self::MODE_JS;
+					break;
+				case "css":
+					self::$mode = self::MODE_CSS;
 					break;
 				default:
 					self::$mode = self::MODE_HTML;
