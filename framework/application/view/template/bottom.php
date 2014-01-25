@@ -4,6 +4,10 @@
 			<p>&copy; William Tinsdeall 2014</p>
 		</footer>
 </div>
+<div id="api-modal" class="modal fade modal-maxi">
+
+</div>
+
 <script type="text/javascript" src="/plugins/boiler/utils.js"></script>
 <script type="text/javascript" src="/js/main_ajax.js"></script>
 <script type="text/javascript" src="/plugins/jquery-pjax/jquery.pjax.js"></script>

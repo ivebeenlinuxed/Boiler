@@ -80,7 +80,6 @@ abstract class ModelController extends \Controller\BaseController {
 			//Get the default views setup
 			$view_type = "singular";
 			$default_view = "view";
-			
 			//We're only ever going to have one row
 			$num_rows = 1;
 			
@@ -106,6 +105,12 @@ abstract class ModelController extends \Controller\BaseController {
 			default:
 				$format = "html";
 				break;
+		}
+		
+		
+		
+		if ($view == false ){
+			$view = $default_view;
 		}
 		
 		$view_vars = array("num_rows"=>$num_rows, "controller"=>$this, "data"=>$data, "class"=>$class, "table"=>$class::getTable());

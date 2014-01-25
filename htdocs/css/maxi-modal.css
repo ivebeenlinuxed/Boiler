@@ -1,0 +1,13 @@
+@CHARSET "UTF-8";
+
+.modal-maxi .modal-dialog {
+	width: 90% !important;
+}
+
+.modal-maxi .modal-dialog {
+	margin: 60px auto !important;
+}
+
+.modal-maxi .modal-content {
+	width: 100%;
+}
