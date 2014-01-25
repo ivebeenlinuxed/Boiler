@@ -31,7 +31,6 @@ abstract class ModelController extends \Controller\BaseController {
 		
 		// Standard REST data processed
 		$this->searchParams = $this->ConditionalRequest();
-		
 		// Get the class we're going to be working with
 		$class = static::getModelClass();
 		
@@ -66,6 +65,8 @@ abstract class ModelController extends \Controller\BaseController {
 
 		
 		if ($id === false || ((int)$id == 0 && $id != "0")) {
+			$view = $id;
+			$id = false;
 			//Get the default collection view;
 			$view_type = "collection";
 			$default_view = "list";
@@ -80,6 +81,7 @@ abstract class ModelController extends \Controller\BaseController {
 			//Get the default views setup
 			$view_type = "singular";
 			$default_view = "view";
+			
 			//We're only ever going to have one row
 			$num_rows = 1;
 			
@@ -107,13 +109,11 @@ abstract class ModelController extends \Controller\BaseController {
 				break;
 		}
 		
-		
-		
-		if ($view == false ){
+		if ($view == false) {
 			$view = $default_view;
 		}
-		
 		$view_vars = array("num_rows"=>$num_rows, "controller"=>$this, "data"=>$data, "class"=>$class, "table"=>$class::getTable());
+		
 		
 		//Find the view we're looking for
 		if (\Core\Router::hasView($v = "api/{$format}/{$class::getTable()}/{$view_type}/{$view}/{$this->disposition}")) {
@@ -133,11 +133,11 @@ abstract class ModelController extends \Controller\BaseController {
 	/**
 	 *
 	 */
-	public function add() {
+	protected function add() {
 		$c = static::getModelClass();
 		$key = $c::getPrimaryKey()[0];
-		$obj = $c::Create(array());
-		header("Location: /{$c::getTable()}/{$obj->$key}/edit");
+		$obj = $c::Create();
+		header("Location: /api/{$c::getTable()}/{$obj->$key}?__edit=1");
 	}
 
 	protected function ProtocolRequest() {
@@ -153,6 +153,7 @@ abstract class ModelController extends \Controller\BaseController {
 				unset($_GET[$key]);
 			}
 		}
+		unset($_GET['_pjax']);
 		return $proto;
 	}
 
@@ -163,9 +164,6 @@ abstract class ModelController extends \Controller\BaseController {
 			$conditions = array();
 		}
 		foreach ($_GET as $key=>$data) {
-			if ($key == "_pjax") {
-				continue;
-			}
 			$conditions[] = array($key, "LIKE", "%".$data."%");
 		}
 		return $conditions;
@@ -224,8 +222,6 @@ abstract class ModelController extends \Controller\BaseController {
 	protected function FetchRequest($search, $fuzzy=true) {
 		$class = $this->getModelClass();
 
-
-
 		$ids = array();
 		$db = $class::getDB();
 		$select = $db->Select($class);
@@ -267,7 +263,7 @@ abstract class ModelController extends \Controller\BaseController {
 
 	}
 
-	protected function CompleteFetch($select) {
+	public function CompleteFetch($select) {
 		$class = static::getModelClass();
 		$key = $class::getPrimaryKey()[0];
 		$out = array();
