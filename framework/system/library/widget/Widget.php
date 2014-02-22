@@ -46,6 +46,10 @@ abstract class Widget {
 				return new \Library\Widget\Complex\Currency();
 			case self::BOOLEAN:
 				return new \Library\Widget\Html\Checkbox();
+			case self::FOREIGN_KEY:
+				return new \Library\Widget\Complex\ForeignKey();
+			case self::WYSIWYG:
+				return new \Library\Widget\Complex\WYSIWYG();
 		}
 	}
 	
