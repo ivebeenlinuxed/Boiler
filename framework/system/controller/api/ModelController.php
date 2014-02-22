@@ -43,21 +43,7 @@ abstract class ModelController extends \Controller\BaseController {
 	}
 	
 	protected function doACL($method, $data=null) {
-		$class = $this->getModelClass();
-		
-		$user = \Controller\BaseController::getCurrentUser();
-		if (!$user) {
-			$result = new \Library\ACL();
-			$result->status_code = \Library\ACL::HTTP_UNAUTHORIZED;
-		} elseif (!$user->isGroup(new \Model\Group(0))) {
-			$result = new \Library\ACL();
-			$result->status_code = \Library\ACL::HTTP_FORBIDDEN;
-			$result->custom_message = "This user is no longer active";
-		} elseif (is_callable(array($class, "ACLRequest"))) {
-			$result = $class::ACLRequest($method, $data);
-		} else {
-			$result  = new \Library\ACL();
-		}
+		$result  = new \Library\ACL();
 		
 		if ($result->status_code >= 200 && $result->status_code < 300) {
 			return;
