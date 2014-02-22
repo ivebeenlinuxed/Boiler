@@ -7,6 +7,8 @@ abstract class Widget {
 	const DATE=0x04;
 	const BOOLEAN=0x08;
 	const CURRENCY=0x10;
+	const FOREIGN_KEY=0x8000;
+	const WYSIWYG=0x10000;
 	
 	public $table;
 	public $field;
