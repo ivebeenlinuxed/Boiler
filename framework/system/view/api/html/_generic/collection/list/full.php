@@ -1,4 +1,10 @@
-<div class="api api-full api-list container">
+<?php 
+if ($controller->protocol['redirect']) {
+	header("Location:  {$controller->protocol['redirect']}");
+	return;
+}
+?>
+<div class="api api-full api-list">
 <ol class="breadcrumb">
   <li><a href="/">Home</a></li>
   <li class="active">List <?php echo $table ?></li>
@@ -11,11 +17,19 @@ $t->current_page = $controller->page;
 $t->data = $data;
 $t->filters = $controller->searchParams;
 $t->num_rows = $num_rows;
+$t->order = $controller->order;
 
 $key = $class::getPrimaryKey()[0];
 
 foreach ($class::getDBColumns() as $col) {
-	$t->addColumn($col, $col, $col==$key? true : false);
+	$fp = $class::getFieldPropertiesByColumn($col);
+	if ($fp->visibility > 1) {
+		$t->toggle_fields[] = $col;
+	}
+	
+	if (in_array($col, $controller->fields)) {
+		$t->columns[] = $col;
+	}
 }
 $t->Render();
 ?>

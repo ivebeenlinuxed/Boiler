@@ -116,8 +116,7 @@ abstract class Router {
 					return array($c, $f, array_slice($controllerArray, $i+1));
 				}
 				$cArgs = array_slice($controllerArray, $i);
-			}
-			if (class_exists($c = "System\\Controller\\".implode("\\", array_slice($controllerArray, 0, $i)), true)) {
+			} elseif (class_exists($c = "System\\Controller\\".implode("\\", array_slice($controllerArray, 0, $i)), true)) {
 				$cOK = $c;
 				if (isset($controllerArray[$i]) && is_callable(array($c, $f = $controllerArray[$i]))) {
 					return array($c, $f, array_slice($controllerArray, $i+1));
@@ -206,8 +205,7 @@ abstract class Router {
 		}
 		if (file_exists(BOILER_LOCATION."system/helper/$helper.php")) {
 			include_once BOILER_LOCATION."system/helper/$helper.php";
-		}
-		if (file_exists(BOILER_LOCATION."application/helper/$helper.php")) {
+		} elseif (file_exists(BOILER_LOCATION."application/helper/$helper.php")) {
 			include_once BOILER_LOCATION."application/helper/$helper.php";
 		}
 

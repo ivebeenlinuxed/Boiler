@@ -18,7 +18,6 @@ require_once "common.php";
 
 $models = getModels();
 
-
 foreach ($models as $table=>$model) {
 	if (strpos($table, "_") !== false) {
 		$class = implode("_",array_map(function($data) {
@@ -79,7 +78,7 @@ EOF;
 	file_put_contents($f, $file);
 	
 	$f = __DIR__."/../../framework/application/controller/api/{$class}.php";
-	if (!file_exists($f) || true) {
+	if (!file_exists($f)) {
 		$file = <<<EOF
 <?php
 /**

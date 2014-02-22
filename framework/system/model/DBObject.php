@@ -70,7 +70,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	 * @see \Library\Database\LinqDB
 	 * @return \Library\Database\LinqDB;
 	*/
-	public static abstract function getDB();
+	//public static abstract function getDB();
 
 	public $DB;
 
@@ -115,7 +115,6 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		$Table = $DB->escape_string($this->getTable(true));
 		$PrimaryKey = $this->getPrimaryKey();
 		$className = get_called_class();
-
 		if (!is_array($PrimaryKey)) {
 			$PrimaryKey = array($PrimaryKey);
 		}
@@ -130,7 +129,6 @@ abstract class DBObject implements \Library\Database\LinqObject {
 
 			throw new DBException("Primary key is the wrong length");
 		}
-
 		$select = $DB->Select($c);
 		$and = $DB->getAndFilter();
 
@@ -212,29 +210,45 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	 */
 	public function setAttributes($array, $set=true) {
 		$c = get_called_class();
-		$PrimaryKey = $c::getPrimaryKey();
-		$DB = $c::getDB();
 		$er = false;
-		$update = $DB->Update($c);
 		
-		foreach ($array as $Key=>$Data) {
-			$update->addSet($Key, $Data);
-			if ($set) {
-				$this->$Key = $Data;
+
+		foreach ($c::getModelHierarchy() as $model) {
+			$PrimaryKey = $model::getPrimaryKey();
+			$DB = $model::getDB();
+			$update = $DB->Update($model);
+			
+			$fields = array();
+			foreach ($array as $key=>$data) {
+				if (in_array($key, $model::getDBColumns())) {
+					$fields[$key] = $data;
+				}
+			}
+			
+			if (count($fields) == 0) {
+				continue;
+			}
+			
+			foreach ($fields as $Key=>$Data) {
+				$update->addSet($Key, $Data);
+				if ($set) {
+					$this->$Key = $Data;
+				}
+			}
+	
+			$filter = $DB->getAndFilter();
+			foreach ($PrimaryKey as $Key) {
+				$filter->eq($Key, $this->$Key);
+				$update->setFilter($filter);
+			}
+			$update->Exec();
+			if ($DB->errno != 0) {
+				throw new DBException("Error occurred: ".self::getError());
 			}
 		}
-
-		$filter = $DB->getAndFilter();
-		foreach ($PrimaryKey as $Key) {
-			$filter->eq($Key, $this->$Key);
-			$update->setFilter($filter);
-		}
-		$update->Exec();
-		if ($DB->errno != 0) {
-			throw new DBException("Error occurred: ".self::getError());
-		} else {
-			return true;
-		}
+		
+		return true;
+		
 	}
 
 
@@ -569,7 +583,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 			$sQ .= ") VALUES (";
 	
 			foreach ($Array as $Key=>$Data) {
-				if ($Data !== false) {
+				if ($Data !== false && $Data !== null) {
 					$sQ .= "'".$DB->escape_string($Data)."', ";
 				} else {
 					$sQ .= "NULL, ";
@@ -577,7 +591,6 @@ abstract class DBObject implements \Library\Database\LinqObject {
 			}
 			$sQ = substr($sQ, 0, -2);
 			$sQ .= ")";
-		
 		$DB->query($sQ);
 		$id = $DB->insert_id;
 		if ($DB->errno != 0) {
@@ -603,6 +616,25 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		}
 		return $out;
 	}
+	
+	/**
+	 * Get all \Model namespaced models that this class inherits (including itself)
+	 * 
+	 * @return string[]
+	 */
+	public static function getModelHierarchy() {
+		$c = get_called_class();
+		
+		$rc = new \ReflectionClass($c);
+		$parents = array($c);
+		while ($parent = $rc->getParentClass()) {
+			if ($parent->inNamespace() && $parent->getNamespaceName() == "Model" && $parent->getShortName() != "DBObject") {
+				$parents[] = $parent->getName();
+			}
+			$rc = $parent;
+		}
+		return $parents;
+	}
 
 	/**
 	 * Creates a new record in the MySQL and returns result as an Object
@@ -611,7 +643,6 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	 * @return self
 	 */
 	public static function Create($Array) {
-
 		$c = get_called_class();
 		$id = self::getIdByCreate($Array);
 		return new $c($id);
@@ -697,6 +728,90 @@ abstract class DBObject implements \Library\Database\LinqObject {
 			$out .= "{$i}-";
 		}
 		return substr($out, 0, -1);
+	}
+	
+	
+	public function getName() {
+		if (in_array("name", static::getDBColumns())) {
+			$name = "name";
+		} elseif (in_array("title", static::getDBColumns())) {
+			$name = "title";
+		} elseif (in_array("description", static::getDBColumns())) {
+			$name = "description";
+		} else {
+			$name = static::getPrimaryKey()[0];
+		}
+		return $this->$name;
+	}
+	
+	
+	public static $data_map;
+	
+	/**
+	 * Override to allow Router settings to take effect
+	 * 
+	 * @return \Library\Database\LinqDB
+	 */
+	public static function getDB() {
+		return \Library\Database\LinqDB::getDB(\Core\Router::$settings['database']['server'], \Core\Router::$settings['database']['user'], \Core\Router::$settings['database']['passwd'], \Core\Router::$settings['database']['db'], \Core\Router::$settings['database']['port']);
+	}
+	
+	public static function getWidgetTypeByColumn($col) {
+		if (static::$data_map[$col]) {
+			$r = static::$data_map[$col];
+			if (is_int($r)) {
+				return $r;
+			} else {
+				return $r->widget;
+			}
+		}
+		return \Library\Widget\Widget::TEXT;
+	}
+	
+	public static function getFieldPropertiesByColumn($col) {
+		$class = get_called_class();
+		if (($map = static::$data_map[$col]) && is_object($map)) {
+			if (!$map->title) {
+				$map->title = \System\Library\Lexical::humanize($col);
+			}
+		} else {
+			
+			if ($key = $class::getForeignKeys()[$col]) {
+				$map = new \Library\FieldProperties();
+				$map->widget = \Library\Widget\Widget::FOREIGN_KEY;
+				$map->title = \System\Library\Lexical::humanize($col);
+				$map->widget_data['table'] = $key->table;
+				$map->visibility = \Library\FieldProperties::VISIBILITY_SHOW;
+				
+			} else {
+				$map = new \Library\FieldProperties();
+				$map->widget = \Library\Widget\Widget::TEXT;
+				$map->title = \System\Library\Lexical::humanize($col);
+				$map->visibility = \Library\FieldProperties::VISIBILITY_SHOW;
+			}
+		}
+		return $map;
+	}
+	
+	public static function getWidgetByColumn($col) {
+		$map = self::getFieldPropertiesByColumn($col);
+		$w = \Library\Widget\Widget::getWidgetByClass($map->widget);
+		$w->setDataFields($map->widget_data);
+		$w->table = static::getTable();
+		$w->field = $col;
+		return $w;
+	}
+	
+	public function getWidgetByField($field) {
+		$map = self::getFieldPropertiesByColumn($field);
+		$w = \Library\Widget\Widget::getWidgetByClass($map->widget);
+		$w->setDataFields($map->widget_data);
+		//$w = \Library\Widget\Widget::getWidgetByClass(self::getWidgetTypeByColumn($field));
+		$w->field = $field;
+		$w->table = static::getTable();
+		$w->id = $this->id;
+		$w->setResult($this->$field);
+		return $w;
 	}
 }
 ?>

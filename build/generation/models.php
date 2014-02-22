@@ -108,7 +108,33 @@ EOF;
 	public static function getPrimaryKey() {
 		return array($pkey);
 	}
+	
+	/**
+	 * Gets the field the key references
+	 * 
+	 * @return array
+	 */
+	public static function getForeignKeys() {
+		\$keys = array();
+
 EOF;
+	foreach ($models[$table]['multi'] as $col=>$key) {
+		$file .= <<<EOF
+
+		\$std = new \stdClass();
+		\$std->table = "{$key[1]}";
+		\$std->field = "{$key[2]}";
+		
+		\$keys[{$key[0]}] = \$std;	
+EOF;
+	}
+	
+	$file .= <<<EOF
+
+		return \$keys;
+	}
+EOF;
+	
 	
 	$addArgs = array();
 	foreach ($models[$table]['key'] as $addArgs) {
@@ -237,8 +263,11 @@ EOF;
 		\$update_result->module = get_class();
 		\$c = get_class();
 		\$update_result->module_table = \$c::getTable();
-		
+		if (\System\Library\StdLib::parent_method_exists(\$this, "bubbleUpdateResult", __CLASS__)) {
+			parent::bubbleUpdateResult(\$update_result, \$loop_control);	
+		}
 		\Library\RTCQueue::Send("/model/".self::getTable()."/{\$this->id}", \$update_result);
+		return;
 EOF;
 	foreach ($models[$table]['multi'] as $col=>$key) {
 		//if ($key[2] != $models[$key[1]]['key'][0] || count($models[$key[1]]['key']) != 1) {

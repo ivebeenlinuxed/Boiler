@@ -305,5 +305,23 @@ class StdLib {
 		}
 		return $arr;
 	}
+	
+	public static function parent_method_exists($object,$method, $below=false)
+	{
+		foreach(class_parents($object) as $parent)
+		{
+			if ($below) {
+				if ($below == $parent) {
+					$below = false;
+				}
+				continue;
+			}
+			if(method_exists($parent,$method))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 }
 ?>

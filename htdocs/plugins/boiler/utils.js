@@ -9,3 +9,15 @@ function build_http_query(parameters) {
 	  }
 	  return qs;
 }
+
+function parse_http_query(string) {
+	out = new Object();
+	
+	e = string.split("&");
+	for (i in e) {
+		keyval = e[i].split("=");
+		out[keyval[0]] = keyval[1];
+	}
+	
+	return out;
+}

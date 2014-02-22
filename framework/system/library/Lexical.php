@@ -20,10 +20,7 @@ class Lexical
 	 * @return string Human-readable string
 	 */
 	public static function humanize($lowerCaseAndUnderscoredWord) {
-		if (!($result = self::_cache(__FUNCTION__, $lowerCaseAndUnderscoredWord))) {
-			$result = ucwords(str_replace('_', ' ', $lowerCaseAndUnderscoredWord));
-			self::_cache(__FUNCTION__, $lowerCaseAndUnderscoredWord, $result);
-		}
+		$result = ucwords(str_replace('_', ' ', $lowerCaseAndUnderscoredWord));
 		return $result;
 	}
 

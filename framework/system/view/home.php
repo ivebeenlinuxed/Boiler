@@ -1,3 +1,6 @@
+<?php 
+\Core\Router::loadView("api/html/_template/".\Core\Router::$disposition."/top");
+?>
 <div class="container">
 <h1>Welcome to Boiler:Data</h1>
 <p>Boiler:Data is the AJAX framework designed for data hackers. It's special because it does all the coding for you!</p>
@@ -41,17 +44,17 @@ foreach (get_declared_classes() as $class) {
 		if ($class == "Model\\DBObject") {
 			continue;
 		}
-		echo "<tr><td><a data-type='api-modal' href='/{$class::getTable()}'>/{$class::getTable()}</a></td>";
-		echo "<td><a data-type='api-modal' href='/{$class::getTable()}/add'>/{$class::getTable()}/add</a></td>";
+		echo "<tr><td><a data-type='api-modal' href='/api/{$class::getTable()}'>/api/{$class::getTable()}</a></td>";
+		echo "<td><a data-type='api-modal' href='/api/{$class::getTable()}/add'>/api/{$class::getTable()}/add</a></td>";
 		$data = $class::getAll(null, 0, 1);
 		$key = $class::getPrimaryKey()[0];
 		if (count($data) == 1 && is_object($data[0])) {
 			$data = $data[0];
-			echo "<td><a data-type='api-modal' href='/{$class::getTable()}/{$data->$key}'>{$class::getTable()}/{$data->$key}</a></td>";
-			echo "<td><a data-type='api-modal' href='/{$class::getTable()}/{$data->$key}/edit'>{$class::getTable()}/{$data->$key}/edit</a></td>";
+			echo "<td><a data-type='api-modal' href='/api/{$class::getTable()}/{$data->$key}'>/api/{$class::getTable()}/{$data->$key}</a></td>";
+			echo "<td><a data-type='api-modal' href='/api/{$class::getTable()}/{$data->$key}/edit'>/api/{$class::getTable()}/{$data->$key}/edit</a></td>";
 		} else {
-			echo "<td>/{$class::getTable()}/{id}</td>";
-			echo "<td>/{$class::getTable()}/{id}/edit</td>";
+			echo "<td>/api/{$class::getTable()}/{id}</td>";
+			echo "<td>/api/{$class::getTable()}/{id}/edit</td>";
 		}
 	}
 }
@@ -74,17 +77,17 @@ foreach (get_declared_classes() as $class) {
 			continue;
 		}
 		
-		echo "<td><a href='/{$class::getTable()}'>/{$class::getTable()}</a></td>";
-		echo "<td><a href='/{$class::getTable()}/add'>/{$class::getTable()}/add</a></td>";
+		echo "<td><a href='/api/{$class::getTable()}'>/api/{$class::getTable()}</a></td>";
+		echo "<td><a href='/api/{$class::getTable()}/add'>/api/{$class::getTable()}/add</a></td>";
 		$data = $class::getAll(null, 0, 1);
 		$key = $class::getPrimaryKey()[0];
 		if (count($data) == 1 && is_object($data[0])) {
 			$data = $data[0];
-			echo "<td><a href='/{$class::getTable()}/{$data->$key}'>{$class::getTable()}/{$data->$key}</a></td>";
-			echo "<td><a href='/{$class::getTable()}/{$data->$key}/edit'>{$class::getTable()}/{$data->$key}/edit</a></td>";
+			echo "<td><a href='/api/{$class::getTable()}/{$data->$key}'>/api/{$class::getTable()}/{$data->$key}</a></td>";
+			echo "<td><a href='/api/{$class::getTable()}/{$data->$key}/edit'>/api/{$class::getTable()}/{$data->$key}/edit</a></td>";
 		} else {
-			echo "<td>/{$class::getTable()}/{id}</td>";
-			echo "<td>/{$class::getTable()}/{id}/edit</td>";
+			echo "<td>/api/{$class::getTable()}/{id}</td>";
+			echo "<td>/api/{$class::getTable()}/{id}/edit</td>";
 		}
 		echo "</tr>";
 	}
@@ -106,14 +109,14 @@ foreach (get_declared_classes() as $class) {
 			continue;
 		}
 		
-		echo "<td><a href='/{$class::getTable()}.json'>/{$class::getTable()}.json</a></td>";
+		echo "<td><a href='/api/{$class::getTable()}.json'>/api/{$class::getTable()}.json</a></td>";
 		$data = $class::getAll(null, 0, 1);
 		$key = $class::getPrimaryKey()[0];
 		if (count($data) == 1 && is_object($data[0])) {
 			$data = $data[0];
-			echo "<td><a href='/{$class::getTable()}/{$data->$key}.json'>{$class::getTable()}/{$data->$key}.json</a></td>";
+			echo "<td><a href='/api/{$class::getTable()}/{$data->$key}.json'>/api/{$class::getTable()}/{$data->$key}.json</a></td>";
 		} else {
-			echo "<td>/{$class::getTable()}/{id}.json</td>";
+			echo "<td>/api/{$class::getTable()}/{id}.json</td>";
 		}
 		echo "</tr>";
 	}
@@ -133,7 +136,7 @@ foreach (get_declared_classes() as $class) {
 			continue;
 		}
 		
-		echo "<td><a href='/{$class::getTable()}.html?__where=%5B%5B%22id%22%2C%22!%3D%22%2C%221%22%5D%5D'>/{$class::getTable()}?__where=[['id', '!=', 1]]</a></td>";
+		echo "<td><a href='/api/{$class::getTable()}.html?__where=%5B%5B%22id%22%2C%22!%3D%22%2C%221%22%5D%5D'>/api/{$class::getTable()}?__where=[['id', '!=', 1]]</a></td>";
 		break;
 	}
 }
@@ -148,7 +151,7 @@ foreach (get_declared_classes() as $class) {
 			continue;
 		}
 		
-		echo "<td><a href='/{$class::getTable()}.html?__X_PAGE=2/4'>/{$class::getTable()}?__X_PAGE=1/4</a></td>";
+		echo "<td><a href='/api/{$class::getTable()}.html?__X_PAGE=2/4'>/api/{$class::getTable()}?__X_PAGE=1/4</a></td>";
 		break;
 	}
 }
@@ -176,3 +179,6 @@ foreach (get_declared_classes() as $class) {
 
 </ul>
 </div>
+<?php 
+\Core\Router::loadView("api/html/_template/".\Core\Router::$disposition."/bottom");
+?>

@@ -6,10 +6,18 @@ use \Library\Data\DataStream;
 abstract class ModelController extends \Controller\BaseController {
 	protected $inputData;
 	public $searchParams;
+	
+	public $raw_data = false;
 	protected $fetchObjects = false;
 	protected $outputData = false;
+	
+	
 	public $protocol = array();
+	
+	
 	public $query = false;
+	public $order = array();
+	public $fields = array();
 
 	public $page = 0;
 	public $page_size = 10;
@@ -34,14 +42,57 @@ abstract class ModelController extends \Controller\BaseController {
 		}
 	}
 	
+	protected function doACL($method, $data=null) {
+		$class = $this->getModelClass();
+		
+		$user = \Controller\BaseController::getCurrentUser();
+		if (!$user) {
+			$result = new \Library\ACL();
+			$result->status_code = \Library\ACL::HTTP_UNAUTHORIZED;
+		} elseif (!$user->isGroup(new \Model\Group(0))) {
+			$result = new \Library\ACL();
+			$result->status_code = \Library\ACL::HTTP_FORBIDDEN;
+			$result->custom_message = "This user is no longer active";
+		} elseif (is_callable(array($class, "ACLRequest"))) {
+			$result = $class::ACLRequest($method, $data);
+		} else {
+			$result  = new \Library\ACL();
+		}
+		
+		if ($result->status_code >= 200 && $result->status_code < 300) {
+			return;
+		} else {
+			\Core\Router::loadView("error", array("acl"=>$result));
+			die();
+		}
+	}
+	
 	public function index($id=false, $view=false) {
+		
+		
 		// Underscored advanced data needs to be removed, before the novices get their turn
 		$this->protocol = $this->ProtocolRequest();
 		
 		// Standard REST data processed
 		$this->searchParams = $this->ConditionalRequest();
+		
+		// Sets the ORDER BY
+		if ($this->protocol['order']) {
+			$this->order = json_decode($this->protocol['order']);
+		}
+		
+		
 		// Get the class we're going to be working with
 		$class = static::getModelClass();
+		
+		$this->fields = $this->getFields();
+		
+		
+		
+		
+		if (!in_array($class::getPrimaryKey()[0], $this->fields)) {
+			$this->fields[] = $class::getPrimaryKey()[0];
+		}
 		
 		//Pagination needs to be initialised from headers
 		if ($_SERVER['HTTP_X_PAGE']) {
@@ -63,16 +114,30 @@ abstract class ModelController extends \Controller\BaseController {
 			$_SERVER['REQUEST_METHOD'] = $_SERVER['HTTP_X_REQUEST_METHOD'];
 		}
 		
+		
+		
 		//Create before deciding which view to use
 		if ($_SERVER['REQUEST_METHOD'] == "POST") {
+			$this->doACL(\Library\OrderModule\UpdateResult::TYPE_CREATE);
 			$this->protocol['edit'] = true;
 			$input = $this->InputHTTP();
-			$data = $this->AlterCreate($input);
+			try {
+				$data = $this->AlterCreate($input);
+			} catch (\Library\Database\DBException $e) {
+				$acl = new \Library\ACL();
+				$acl->status_code = \Library\ACL::HTTP_BAD_REQUEST;
+				$acl->custom_message = "Problem while creating: ".$e->getMessage();
+				\Core\Router::loadView("error", array("acl"=>$acl));
+				die();
+			}
 			$key = $class::getPrimaryKey()[0];
 			$id = $data->$key;
+			//header("Location: /api/".$class::getTable()."/{$id}");
+			//return;
 		}
 		
 		if ($_SERVER['REQUEST_METHOD'] == "DELETE") {
+			$this->doACL(\Library\OrderModule\UpdateResult::TYPE_DELETE, $id);
 			$data = $class::Fetch($id);
 			$this->AlterDelete($data);
 			$id = false;
@@ -80,6 +145,7 @@ abstract class ModelController extends \Controller\BaseController {
 
 		
 		if ($id === false || ((int)$id == 0 && $id != "0")) {
+			$this->doACL(\Library\OrderModule\UpdateResult::TYPE_GET);
 			$view = $id;
 			$id = false;
 			//Get the default collection view;
@@ -92,8 +158,10 @@ abstract class ModelController extends \Controller\BaseController {
 			$qData->free_result();
 			$data->setLimit($this->page*$this->page_size, $this->page_size);
 			$data = $data->Exec();
+			$this->raw_data = $data;
 			$data = $this->CompleteFetch($data);
 		} else {
+			$this->doACL(\Library\OrderModule\UpdateResult::TYPE_GET, $id);
 			//Get the default views setup
 			$view_type = "singular";
 			$default_view = "view";
@@ -124,6 +192,9 @@ abstract class ModelController extends \Controller\BaseController {
 		}
 		$view_vars = array("num_rows"=>$num_rows, "controller"=>$this, "data"=>$data, "class"=>$class, "table"=>$class::getTable());
 		
+		if (\Core\Router::hasView("/api/$format/_template/{$this->disposition}/top")) {
+			\Core\Router::loadView("/api/$format/_template/{$this->disposition}/top");
+		}
 		//Find the view we're looking for
 		if (\Core\Router::hasView($v = "api/{$format}/{$class::getTable()}/{$view_type}/{$view}/{$this->disposition}")) {
 			\Core\Router::loadView($v, $view_vars);
@@ -137,16 +208,35 @@ abstract class ModelController extends \Controller\BaseController {
 		} else {
 			\Core\Router::loadView("api/{$format}/_generic/{$view_type}/{$default_view}/full", $view_vars);
 		}
+		
+		if (\Core\Router::hasView("/api/$format/_template/{$this->disposition}/bottom")) {
+			\Core\Router::loadView("/api/$format/_template/{$this->disposition}/bottom");
+		}
 	}
-
-	/**
-	 *
-	 */
-	public function add() {
-		$c = static::getModelClass();
-		$key = $c::getPrimaryKey()[0];
-		$obj = $c::Create(array());
-		header("Location: /{$c::getTable()}/{$obj->$key}?__edit=1");
+	
+	protected function getFields() {
+		$class = $this->getModelClass();
+		//Get fields requested
+		if ($this->protocol['fields']) {
+			return json_decode($this->protocol['fields']);
+		} else {
+			$fields = array();
+			foreach ($class::getDBColumns() as $col) {
+				$fp = $class::getFieldPropertiesByColumn($col);
+				if ($fp->visibility == \Library\FieldProperties::VISIBILITY_SHOW) {
+					$fields[] = $col;
+				}
+			}
+			return $fields;
+		}
+		
+		//Apply security
+		foreach ($this->fields as $offset=>$field) {
+			$fp = $class::getFieldPropertiesByColumn($field);
+			if ($fp->visibility == \Library\FieldProperties::VISIBILITY_PRIVATE) {
+				array_splice($this->fields, $offset, 1);
+			}
+		}
 	}
 
 	protected function ProtocolRequest() {
@@ -159,7 +249,6 @@ abstract class ModelController extends \Controller\BaseController {
 			if (substr($key, 0, 2) == "__") {
 				$keyb = substr($key, 2);
 				$proto[$keyb] = $value;
-				unset($_GET[$key]);
 			}
 		}
 		return $proto;
@@ -170,12 +259,6 @@ abstract class ModelController extends \Controller\BaseController {
 			$conditions = json_decode($this->protocol['where']);
 		} else {
 			$conditions = array();
-		}
-		foreach ($_GET as $key=>$data) {
-			if ($key == "_pjax") {
-				continue;
-			}
-			$conditions[] = array($key, "LIKE", "%".$data."%");
 		}
 		return $conditions;
 	}
@@ -193,12 +276,14 @@ abstract class ModelController extends \Controller\BaseController {
 	protected function InputHTTP() {
 		$rawdata = $_POST;
 		$d = new DataStream();
+		/*
 		foreach ($_POST as $key=>$data) {
 			if (substr($key, 0, 2) == "__") {
 				$d->protocol[substr($key, 2)] = $data;
 				unset($rawdata[$key]);
 			}
 		}
+		*/
 		if ($_POST != null) {
 			$d->data = $rawdata;
 		}
@@ -226,18 +311,37 @@ abstract class ModelController extends \Controller\BaseController {
 			$data = $class::Fetch($id);
 			return $data;
 		}
-		$data = $this->FetchRequest($this->searchParams, true);
+		$data = $this->__FetchRequest(true);
 		return $data;
 	}
-
-	protected function FetchRequest($search, $fuzzy=true) {
-		$class = $this->getModelClass();
-
-		$ids = array();
-		$db = $class::getDB();
-		$select = $db->Select($class);
-		$and = $select->getAndFilter();
-		foreach ($search as $param) {
+	
+	protected function getFilterFromInput($select, $search, $current=null) {
+		if ($current) {
+			$and = $current;
+		} else {
+			$and = $select->getAndFilter();
+		}
+		foreach ($search as $offset=>$param) {
+			if ($offset == 1) {
+				if (is_string($param)) {
+					switch ($param) {
+						case "OR":
+							$and = $select->getOrFilter();
+							break;
+						default:
+							$and = $select->getAndFilter();
+							break; 
+					}
+					continue;
+				}
+			} else {
+				$and = $select->getAndFilter();
+			}
+			
+			if (is_array($param[0])) {
+				$this->getFilterFromInput($select, $param, $and);
+			}
+			
 			switch ($param[1]) {
 				case "=":
 					$and->eq($param[0], $param[2]);
@@ -267,8 +371,53 @@ abstract class ModelController extends \Controller\BaseController {
 					new \Library\APIException("The equality symbol was note recognised");
 			}
 		}
+		return $and;
+	}
+	
+	public function getSelectsFromInput($select, $input) {
+		foreach ($input as $field) {
+			if (is_string($field)) {
+				$select->addField($field);
+			} if (is_array($field)) {
+				switch ($field[0]) {
+					case "SUM":
+						$select->addSum($field[1]);
+				}
+			}
+		}
+	}
+	
+	protected function getUnderlyingSelect() {
+		$class = $this->getModelClass();
+		$ids = array();
+		$db = $class::getDB();
+		$select = $db->Select($class);
+		foreach ($class::getDBColumns() as $col) {
+			$select->addField($col);
+		}
+		return $select;
+	}
+	
+	protected function getWrappedSelect() {
+		$class = $this->getModelClass();
+		$db = $class::getDB();
+		return $db->Select($this->getUnderlyingSelect());
+	}
+	
+
+	protected function __FetchRequest($fuzzy=true) {
+		$select = $this->getWrappedSelect();
+		
+		$this->getSelectsFromInput($select, $this->fields);
+		$search = $this->searchParams;
+		$and = $this->getFilterFromInput($select, $search);
 		$select->setFilter($and);
+		foreach ($this->order as $o) {
+			$select->setOrder($o[0], $o[1] != "DESC");
+		}
 		$this->query = $select;
+		
+		
 		return $select;
 
 
@@ -279,7 +428,14 @@ abstract class ModelController extends \Controller\BaseController {
 		$key = $class::getPrimaryKey()[0];
 		$out = array();
 		foreach ($select as $row) {
-			$out[] = new $class($row[$key]);
+			$o = new $class($row[$key]);
+			
+			foreach ($row as $field=>$data) {
+				if (!isset($o->field)) {
+					$o->$field = $data;
+				}
+			}
+			$out[] = $o;
 		}
 		return $out;
 	}
@@ -335,6 +491,57 @@ abstract class ModelController extends \Controller\BaseController {
 				$out[] = $b;
 			}
 			return $out;
+		} else {
+			// Fetch each part
+			$boundary = $matches[1];
+			$parts = array_slice(explode($boundary, $raw_data), 1);
+			$data = array();
+			
+			foreach ($parts as $part) {
+				// If this is the last part, break
+				if ($part == "--\r\n") break;
+			
+				// Separate content from headers
+				$part = ltrim($part, "\r\n");
+				list($raw_headers, $body) = explode("\r\n\r\n", $part, 2);
+			
+				// Parse the headers list
+				$raw_headers = explode("\r\n", $raw_headers);
+				$headers = array();
+				foreach ($raw_headers as $header) {
+					list($name, $value) = explode(':', $header);
+					$headers[strtolower($name)] = ltrim($value, ' ');
+				}
+			
+				// Parse the Content-Disposition to get the field name, etc.
+				if (isset($headers['content-disposition'])) {
+					$filename = null;
+					preg_match(
+					'/^(.+); *name="([^"]+)"(; *filename="([^"]+)")?/',
+					$headers['content-disposition'],
+					$matches
+					);
+					list(, $type, $name) = $matches;
+					if (isset($matches[4])) {
+						//is a file
+						$filename = $matches[4];
+					}
+					
+					// handle your fields here
+					switch ($name) {
+						// this is a file upload
+						case 'userfile':
+							file_put_contents($filename, $body);
+							break;
+			
+							// default for all other files is to populate $data
+						default:
+							$data[$name] = substr($body, 0, strlen($body) - 2);
+							break;
+					}
+				}
+			
+			}
 		}
 			
 		$boundary = $matches[1];

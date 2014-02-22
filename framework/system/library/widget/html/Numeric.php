@@ -1,5 +1,5 @@
 <?php
-namespace Library\Widget\Html;
+namespace System\Library\Widget\Html;
 
 class Numeric extends \Library\Widget\Widget {
 	public $result = 0;

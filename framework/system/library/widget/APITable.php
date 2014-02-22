@@ -13,6 +13,10 @@ class APITable {
 	public $num_rows = 0;
 	
 	public $filters = array();
+	public $order = array();
+	
+	public $toggle_fields = array();
+	public $show_fields = array();
 	
 	public function __construct($class) {
 		$this->class = $class;

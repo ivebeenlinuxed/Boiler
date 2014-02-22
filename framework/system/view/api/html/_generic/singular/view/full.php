@@ -1,4 +1,8 @@
 <?php 
+if ($controller->protocol['redirect']) {
+	header("Location:  {$controller->protocol['redirect']}");
+	return;
+}
 if (!isset($edit_mode)) {
 	$edit_mode = false;
 }

@@ -6,6 +6,8 @@ class SearchExpression {
 	
 	public $class;
 	
+	public $query = array();
+	
 	public $filters  = array();
 	
 	public $id;

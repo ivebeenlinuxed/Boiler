@@ -22,3 +22,16 @@ while (($f = readdir($dir)) !== false) {
 		unlink("../../framework/system/model/".$f);
 	}
 }
+
+$dir = opendir("../../framework/application/model/");
+
+while (($f = readdir($dir)) !== false) {
+	if ($f == "." || $f == "..") {
+		continue;
+	} elseif (array_search($f, $cn) !== false) {
+		echo "FILE $f: ACTIVE\r\n";
+	} else {
+		echo "FILE $f: INACTIVE\r\n";
+		unlink("../../framework/application/model/".$f);
+	}
+}

@@ -70,7 +70,7 @@ class LinqSelect implements LinqQuery {
 	public function getFrom() {
 		if (!is_object($this->obj) && class_exists($this->obj) && \System\Library\StdLib::is_interface_of($this->obj, "\Library\Database\LinqObject")) {
 			$o = $this->obj;
-			return "`".$o::getTable()."`";
+			return "`".$o::getTable(true)."`";
 		} else {
 			return "(".$this->obj->getSQL().") AS ".$this->name;
 		}

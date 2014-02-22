@@ -52,7 +52,7 @@ $class::getWidgetTypeByColumn($column[1]) == \Library\Widget\Widget::NUMERIC
 				<option value="!=">!=</option>
 				<option value="=" selected>=</option>
 				<option value="LIKE">LIKE</option>
-				<option value="NOT LIKE" selected>NOT LIKE</option>
+				<option value="NOT LIKE">NOT LIKE</option>
 
 				<?php
 				}
