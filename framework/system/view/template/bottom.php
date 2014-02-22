@@ -18,5 +18,6 @@
 <script type="text/javascript" src="/plugins/boiler/widget/search_expression/search_expression.js"></script>
 <script type="text/javascript" src="/plugins/boiler/widget/tooltip-loader.js"></script>
 <script type="text/javascript" src="/plugins/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/plugins/boiler/widget/tinymce.js"></script>
 </body>
 </html>
