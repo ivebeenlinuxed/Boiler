@@ -1,7 +1,7 @@
 <?php
 namespace Library\Widget\Complex;
 
-class WYSIWYG extends \System\Widget\Complex\WYSIWYG {
+class WYSIWYG extends \System\Library\Widget\Complex\WYSIWYG {
 
 }
 ?>
