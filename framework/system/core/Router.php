@@ -32,6 +32,14 @@ abstract class Router {
 	 */
 	protected static $defaultController = "Home";
 
+	
+	/**
+	 *
+	 * What disposition is the content displaying (full? modal? mobile?)
+	 * @var string
+	 */
+	public static $disposition = "full";
+	
 	/**
 	 *
 	 * If no callable function can be found in path, call this one
@@ -143,6 +151,16 @@ abstract class Router {
 			include BOILER_LOCATION."../config.php";
 			self::$settings = $settings;
 		}
+		
+
+		if ($_SERVER['HTTP_X_DISPOSITION']) {
+			self::$disposition = $_SERVER['HTTP_X_DISPOSITION'];
+		}
+		
+		if ($_SERVER['HTTP_X_REQUEST_METHOD']) {
+			$_SERVER['REQUEST_METHOD'] = $_SERVER['HTTP_X_REQUEST_METHOD'];
+		}
+		session_start();
 	}
 
 
