@@ -1,5 +1,5 @@
 <?php
-namespace Library\Widget\Complex;
+namespace System\Library\Widget\Complex;
 
 class ForeignKey extends \Library\Widget\Widget {
 	public $class;

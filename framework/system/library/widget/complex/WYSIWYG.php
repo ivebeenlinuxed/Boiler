@@ -1,5 +1,5 @@
 <?php
-namespace Library\Widget\Complex;
+namespace System\Library\Widget\Complex;
 
 class WYSIWYG extends \Library\Widget\Widget {
 	
