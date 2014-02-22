@@ -1,6 +1,7 @@
 <?php
-namespace Library\Widget;
-use Controller\Api\Material;
+namespace System\Library\Widget;
+
+
 abstract class Widget {
 	const NUMERIC=0x01;
 	const TEXT=0x02;
