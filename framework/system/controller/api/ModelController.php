@@ -118,7 +118,7 @@ abstract class ModelController extends \Controller\BaseController {
 		
 		//Create before deciding which view to use
 		if ($_SERVER['REQUEST_METHOD'] == "POST") {
-			$this->doACL(\Library\OrderModule\UpdateResult::TYPE_CREATE);
+			$this->doACL(\Library\ACL::METHOD_CREATE);
 			$this->protocol['edit'] = true;
 			$input = $this->InputHTTP();
 			try {
@@ -137,7 +137,7 @@ abstract class ModelController extends \Controller\BaseController {
 		}
 		
 		if ($_SERVER['REQUEST_METHOD'] == "DELETE") {
-			$this->doACL(\Library\OrderModule\UpdateResult::TYPE_DELETE, $id);
+			$this->doACL(\Library\ACL::METHOD_DELETE, $id);
 			$data = $class::Fetch($id);
 			$this->AlterDelete($data);
 			$id = false;
@@ -145,7 +145,7 @@ abstract class ModelController extends \Controller\BaseController {
 
 		
 		if ($id === false || ((int)$id == 0 && $id != "0")) {
-			$this->doACL(\Library\OrderModule\UpdateResult::TYPE_GET);
+			$this->doACL(\Library\ACL::METHOD_GET);
 			$view = $id;
 			$id = false;
 			//Get the default collection view;
@@ -161,7 +161,7 @@ abstract class ModelController extends \Controller\BaseController {
 			$this->raw_data = $data;
 			$data = $this->CompleteFetch($data);
 		} else {
-			$this->doACL(\Library\OrderModule\UpdateResult::TYPE_GET, $id);
+			$this->doACL(\Library\ACL::METHOD_GET, $id);
 			//Get the default views setup
 			$view_type = "singular";
 			$default_view = "view";

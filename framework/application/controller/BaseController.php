@@ -45,4 +45,7 @@ class BaseController {
 		return null;
 	}
 	*/
+	public static function getCurrentUser() {
+		return null;
+	}
 }

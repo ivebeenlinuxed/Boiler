@@ -1,3 +1,8 @@
+<?php 
+if ($_SERVER['HTTP_X_REQUESTED_WITH'] == "XMLHttpRequest") {
+	return;
+}
+?>
 <!doctype html>
 <html lang="en">
 <head>
@@ -35,3 +40,4 @@
 		<!-- /.navbar-collapse -->
 		</div>
 	</nav>
+	<div class="container" id="main-container">

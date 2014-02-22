@@ -3,6 +3,6 @@ namespace Controller;
 
 class Home {
 	function index() {
-		\Core\Router::loadView("landing");
+		\Core\Router::loadView("home");
 	}
 }

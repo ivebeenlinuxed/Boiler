@@ -1,7 +1,6 @@
 <?php 
 \Core\Router::loadView("api/html/_template/".\Core\Router::$disposition."/top");
 ?>
-<div class="container">
 <h1>Welcome to Boiler:Data</h1>
 <p>Boiler:Data is the AJAX framework designed for data hackers. It's special because it does all the coding for you!</p>
 <p>Also, because it's built on Boiler, it's fast, easy to manipulate and easy to extend!</p>
@@ -178,7 +177,6 @@ foreach (get_declared_classes() as $class) {
 <ul>
 
 </ul>
-</div>
 <?php 
 \Core\Router::loadView("api/html/_template/".\Core\Router::$disposition."/bottom");
 ?>

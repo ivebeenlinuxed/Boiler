@@ -1,4 +1,10 @@
-<div class="container">
+<?php 
+if ($_SERVER['HTTP_X_REQUESTED_WITH'] == "XMLHttpRequest") {
+	return;
+}
+?>
+</div>
+	<div class="container">
 		<footer>
 			<hr>
 			<p>&copy; William Tinsdeall 2014</p>

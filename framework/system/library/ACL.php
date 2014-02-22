@@ -2,6 +2,12 @@
 namespace System\Library;
 
 class ACL {
+	const METHOD_UPDATE = 0x01;
+	const METHOD_CREATE = 0x02;
+	const METHOD_DELETE = 0x04;
+	const METHOD_GET = 0x08;
+	
+	
 	const HTTP_OK=200;
 	const HTTP_CREATED=201;
 	const HTTP_ACCEPTED=202;
