@@ -28,11 +28,7 @@ abstract class Widget {
 		}
 		return $str;
 	}
-	
-	
-	public function setResult($result) {
-		$this->result = $result;
-	}
+
 	
 	public static function getWidgetByClass($class) {
 		switch ($class) {
@@ -99,6 +95,14 @@ abstract class Widget {
 	
 	public function RenderEditlessSpan($result) {
 		echo "<span data-table='{$this->table}' data-field='{$this->field}' data-id='{$this->id}'>{$result}</span>";
+	}
+	
+	public function setResult($result) {
+		$this->result = $result;
+	}
+	
+	public function setDataFields($fields) {
+		$this->data_fields = $fields;
 	}
 	
 	public function getPlainTextResult() {
