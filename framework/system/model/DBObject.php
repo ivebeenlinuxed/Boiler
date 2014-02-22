@@ -775,7 +775,6 @@ abstract class DBObject implements \Library\Database\LinqObject {
 				$map->title = \System\Library\Lexical::humanize($col);
 			}
 		} else {
-			
 			if ($key = $class::getForeignKeys()[$col]) {
 				$map = new \Library\FieldProperties();
 				$map->widget = \Library\Widget\Widget::FOREIGN_KEY;

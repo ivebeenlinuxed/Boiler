@@ -70,6 +70,33 @@ abstract class Widget {
 		}
 	}
 	
+	public function getDataFields($writevalue=true) {
+		$out = "";
+		if ($this->table) {
+			$out .= " data-table='{$this->table}'";
+		}
+	
+		if ($this->field) {
+			$out .= " data-field='{$this->field}'";
+			$out .= " name='{$this->field}'";
+		}
+	
+		if ($this->id) {
+			$out .= " data-id='{$this->id}'";
+		}
+	
+		if ($this->result && $writevalue) {
+			$out .= " value='{$this->result}'";
+		}
+	
+	
+		foreach ($this->data_fields as $field=>$value) {
+			$out .= " data-{$field}={$value}";
+		}
+	
+		return $out;
+	}
+	
 	public function RenderEditlessSpan($result) {
 		echo "<span data-table='{$this->table}' data-field='{$this->field}' data-id='{$this->id}'>{$result}</span>";
 	}
