@@ -1,85 +1,57 @@
-$(document).ready(function() {
-	
-	WidgetFactory.Render($("body"));
-	$("body").on("DOMSubtreeModified", function(e) {
-		WidgetFactory.Render(e.target);
-	});
-});
-
-
-
-WidgetFactory = new Object();
-WidgetFactory.rendering = false;
-WidgetFactory.widget_library = new Array();
-
-WidgetFactory.registered_elements = new Array();
-
-WidgetFactory.RegisterWidget = function(selector, cnstrct) {
-	obj = new Object();
-	obj.selector = selector;
-	obj.constr = cnstrct;
-	
-	WidgetFactory.widget_library.push(obj);
-}
-
-WidgetFactory.Render = function(el) {
-	if (WidgetFactory.rendering) {
-		return;
-	}
-	WidgetFactory.rendering = true;
-	for (i in WidgetFactory.widget_library)	{
-		widget = WidgetFactory.widget_library[i];
-		$(widget.selector, el).each(function() {
-			if (!this.widget) {
-				this.widget = new widget.constr(this);
-				WidgetFactory.registered_elements.push(this);
-			}
-		});
-	}
-	new_reg = new Array();
-	for (i in WidgetFactory.registered_elements) {
-		reg = WidgetFactory.registered_elements[i];
-		if (!$.contains(document, reg)) {
-			if (reg.widget.Destroy) {
-				reg.widget.Destroy();
-			}
-		} else {
-			new_reg.push(reg);
-		}
-	}
-	WidgetFactory.registered_elements = new_reg;
-	
-	WidgetFactory.rendering = false;
-}
-
-
 var lock_id = Math.round(Math.random()*Math.random()*10000);
-Widget = function(el) {
-	this.element = $(el);
-	this.id = this.element.attr("data-id");
-	this.table = this.element.attr("data-table");
-	this.field = this.element.attr("data-field");
-	$(this.element).on("change", this.Changed.bind(this));
-	$(this.element).on("keyup", this.Changed.bind(this));
-	$(this.element).on("focus", this._onfocus.bind(this));
-	$(this.element).on("blur", this._onblur.bind(this));
+Widget = function() {
+	$this = $(this);
+	console.log("Widget Created");
+	if ($this.is("input, select, span, textarea")) {
+		this.input = $this;
+	} else {
+		this.input = $this.find("input");
+	}
 	
+	this.id = this.dataset.id;
+	this.table = this.dataset.table;
+	this.field = this.dataset.field;
+	this.is_refreshing = false;
+	
+	if (this.input) {
+		this.input.on("change", this.Changed);
+		this.input.on("keyup", this.Changed);
+		this.input.on("focus", this._onfocus);
+		this.input.on("blur", this._onblur);
+	}
 	
 	this.lockTimeout = null;
 	this.relockTimeout = null;
 	this.lock_rtc = null;
+	this.updateTimeout = null;
 	
 	waitForSocket(function(that) {
 		return function(sock) {
 			that.lock_rtc = sock;
 			that.lock_rtc.subscribe("/lock/"+that.table+"/"+that.id+"/"+that.field, function(that) {
-				return function(channel, response) {
-					console.log(response);
-					console.log("Got a lock: "+response.lock_id);
-					if (response.lock_id != lock_id && response.lock_id != 0) {
-						that.EnforceLock(response.user);
-					} else {
+				return function(args, kwargs) {
+					response = kwargs;
+					
+					
+					if (response.lock_id == 0) {
 						that.EnforceUnlock();
+					} else if (response.lock_id != lock_id) {
+						that.EnforceLock(response.user);
+					}
+				}
+			}(that));
+		}
+	}(this));
+	
+	waitForSocket(function(that) {
+		return function(sock) {
+			that.lock_rtc = sock;
+			that.lock_rtc.subscribe("/model/"+that.table+"/"+that.id, function(that) {
+				return function(channel, response) {
+					if (response.old_data[that.field] != response.data[that.field]
+						&& response.type == 1 && !$(that.input).is(":focus")
+						&& response.target_module_table == response.module_table) {
+						that.Refresh();
 					}
 				}
 			}(that));
@@ -87,60 +59,97 @@ Widget = function(el) {
 	}(this));
 }
 
-Widget.prototype = {
-		Destroy: function() {
+Widget.prototype = Object.create(HTMLInputElement.prototype, {
+		Destroy: {value: function() {
 			console.log("Destroyed widget");
-		},
-		Changed: function() {
-			val = $(this.element).attr("data-result")? $(this.element).attr("data-result") : $(this.element).val();
+		}},
+		Changed: {value: function() {
+			if (this.updateTimeout) {
+				clearTimeout(this.updateTimeout);
+			}
+			this.updateTimeout = setTimeout(this._doChanged.bind(this), 1000);
+		}},
+		
+		_doChanged: {value: function() {
+			savereg = StatusWidget.SaveRegister();
+			this.updateTimeout = null;
+			val = $(this.input).attr("data-result")? $(this.input).attr("data-result") : $(this.input).val();
 			$.ajax({
 				url: "/api/"+this.table+"/"+this.id+".json",
 				type: "PUT",
-				data: encodeURIComponent(this.field)+"="+encodeURIComponent(val)
+				data: encodeURIComponent(this.field)+"="+encodeURIComponent(val),
+				success: function(savereg) {
+					return function() {
+						StatusWidget.SaveFinish(savereg);
+					}
+				}(savereg),
+				error: function(savereg) {
+					return function() {
+						StatusWidget.SaveError(savereg);
+					}
+				}(savereg)
 			});
-		},
+		}},
 		
-		_onfocus: function() {
+		_onfocus: {value: function() {
 			this.Lock();
-		},
+		}},
 		
-		_onblur: function() {
+		_onblur: {value: function() {
 			this.Unlock();
-		},
+		}},
 		
-		EnforceLock: function(user) {
-			if (this.lockTimeout) {
-				clearTimeout(this.lockTimeout);
+		Refresh: {value: function() {
+			if (!$(this.element).attr("data-type")) {
+				return;
 			}
-			this.lockTimeout = setTimeout(this.EnforceUnlock.bind(this), 5000);
-			$(this.element).attr("disabled", true);
+			this.is_refreshing = true;
+			$.ajax({
+				url: "/util/widget/render/"+$(this.element).attr("data-type")+"?"+build_http_query($(this.element).data()),
+				success: function(result) {
+					this.is_refreshing = false;
+					e = $(result);
+					$(this.element).replaceWith(e);
+					this.element = e[0];
+					console.log("REPLACED");
+				},
+				context: this
+			});
+		}},
+		
+		EnforceLock: {value: function(user) {
+			if (this.unlockTimeout) {
+				clearTimeout(this.unlockTimeout);
+			}
+			this.unlockTimeout = setTimeout(this.EnforceUnlock.bind(this), 15000);
+			$(this.input).attr("disabled", true);
 			if (user) {
 				data = {animation: false, title: "Locked by "+user.firstname+" "+user.surname, trigger: "manual"};
 				$(this.element).tooltip(data).tooltip("show");
 			}
-		},
+		}},
 		
-		EnforceUnlock: function() {
+		EnforceUnlock: {value: function() {
+			if (this.relockTimeout) {
+				clearTimeout(this.relockTimeout);
+			}
 			if (this.lockTimeout) {
 				clearTimeout(this.lockTimeout);
 			}
-			$(this.element).attr("disabled", false);
+			$(this.input).attr("disabled", false);
 			$(this.element).tooltip("hide");
-		},
+		}},
 		
-		Lock: function() {
+		Lock: {value: function() {
 			if (this.relockTimeout) {
 				clearTimeout(this.relockTimeout);
 			}
-			this.relockTimeout = setTimeout(this.Lock.bind(this), 3000);
-			this.lock_rtc.call("/lock/"+this.table+"/"+this.id+"/"+this.field, lock_id, current_user);
-		},
+			this.relockTimeout = setTimeout(this.Lock.bind(this), 10000);
+			this.lock_rtc.publish("/lock/"+this.table+"/"+this.id+"/"+this.field, [], {"lock_id": lock_id});
+		}},
 		
-		Unlock: function() {
-			if (this.relockTimeout) {
-				clearTimeout(this.relockTimeout);
-			}
-			this.lock_rtc.call("/lock/"+this.table+"/"+this.id+"/"+this.field, 0, current_user);
-		},
+		Unlock: {value: function() {
+			this.lock_rtc.publish("/lock/"+this.table+"/"+this.id+"/"+this.field, [], {"lock_id": 0});
+		}},
 		
-}
+});

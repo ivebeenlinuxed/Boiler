@@ -14,7 +14,7 @@
 	<li>Get Boiler to build all your API for you: ant api</li>
 </ol>
 <p>You're done!</p>
-Below is a list of all the models that you have created. Make sure you run the API command for the links to work!
+Below is a list of all the models that you have created. Make sure you run "ant api" command, as above, for the links to work!
 
 <table class="table table-striped table-bordered">
 	<tr>
@@ -174,9 +174,25 @@ foreach (get_declared_classes() as $class) {
 </tr>
 </table>
 
-<ul>
+<table class="table table-striped table-bordered">
+	<tr>
+		<th colspan="3">Widgets</th>
+	</tr>
+	<tr>
+		<th>Text Widget</th>
+		<td><input is="text-widget" /></td>
+	</tr>
+	<tr>
+		<th>Select Widget</th>
+		<td>
+			<select is="select-widget">
+				<option>Testing 1</option>
+				<option>Testing 2</option>
+			</select>
+		</td>
+	</tr>
+</table>
 
-</ul>
 <?php 
 \Core\Router::loadView("api/html/_template/".\Core\Router::$disposition."/bottom");
 ?>

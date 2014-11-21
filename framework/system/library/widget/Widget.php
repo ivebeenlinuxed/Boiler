@@ -21,6 +21,14 @@ abstract class Widget {
 	
 	public $result;
 	
+	public static function getLoaderByClass($class) {
+		switch ($class) {
+			case self::TEXT:
+				\Library\Widget\Html\Text::getLoaderView();
+				break;
+		}
+	}
+	
 	public function RenderDataFields() {
 		$str = "";
 		foreach ($this->data_fields as $field=>$value) {

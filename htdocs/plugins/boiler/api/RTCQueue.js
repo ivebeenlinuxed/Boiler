@@ -44,20 +44,35 @@ function waitForSocket(func) {
 	if (wsconn) {
 		func(wsconn);
 	} else {
-		waitSocketListeners.push(wsconn);
+		waitSocketListeners.push(func);
 	}
 }
 
 function triggerSocket() {
-	for (i in waitSocketListeners) {
+	for (var i in waitSocketListeners) {
 		waitSocketListeners[i](wsconn);
 	}
 }
+var connection = new autobahn.Connection({
+//    url: "ws://" + window.location.host,
+  url: "ws://" + window.location.host + ":8282",
+   realm: 'boiler',
+    protocols: []
+ });
 
+wsconn=null;
 
+connection.onopen = function (session) {
+	wsconn = session;
+	triggerSocket();
+}
 
+connection.open();
+
+/*
 var wsuri = "ws://" + window.location.host; // + ":8080";
-var wsconn = ab.connect(wsuri, function(session) {
+var wsconn = autobahn.Session(wsuri, function(session) {
 		wsconn = session;
 		triggerSocket();
 });
+*/
