@@ -153,11 +153,11 @@ abstract class Router {
 		}
 		
 
-		if ($_SERVER['HTTP_X_DISPOSITION']) {
+		if (isset($_SERVER['HTTP_X_DISPOSITION'])) {
 			self::$disposition = $_SERVER['HTTP_X_DISPOSITION'];
 		}
 		
-		if ($_SERVER['HTTP_X_REQUEST_METHOD']) {
+		if (isset($_SERVER['HTTP_X_REQUEST_METHOD'])) {
 			$_SERVER['REQUEST_METHOD'] = $_SERVER['HTTP_X_REQUEST_METHOD'];
 		}
 		session_start();

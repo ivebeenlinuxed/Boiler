@@ -180,7 +180,7 @@ foreach (get_declared_classes() as $class) {
 	</tr>
 	<tr>
 		<th>Text Widget</th>
-		<td><input is="text-widget" /></td>
+		<td><?php $w = new \Controller\Widget\Text(); $w->RenderAnonymous() ?></td>
 	</tr>
 	<tr>
 		<th>Select Widget</th>

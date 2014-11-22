@@ -1,5 +1,5 @@
 <?php 
-if ($_SERVER['HTTP_X_REQUESTED_WITH'] == "XMLHttpRequest") {
+if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == "XMLHttpRequest") {
 	return;
 }
 ?>
@@ -20,7 +20,6 @@ if ($_SERVER['HTTP_X_REQUESTED_WITH'] == "XMLHttpRequest") {
 
 
 <script type="text/javascript" src="/plugins/boiler/widget/WidgetFactory.js"></script>
-<link rel="import" href="/util/widget/loader/<?php echo \Library\Widget\Widget::TEXT ?>" />
 
 
 
@@ -36,6 +35,7 @@ if ($_SERVER['HTTP_X_REQUESTED_WITH'] == "XMLHttpRequest") {
 <script type="text/javascript" src="/plugins/bootstrap/js/bootstrap.min.js"></script>
 
 <link rel="import" href="/widget/text/loader" />
+<link rel="import" href="/widget/foreign_key/loader" />
 
 </body>
 </html>
