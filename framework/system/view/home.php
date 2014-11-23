@@ -187,12 +187,9 @@ foreach (get_declared_classes() as $class) {
 		<td><?php $w = new \Controller\Widget\Date(); $w->RenderAnonymous() ?></td>
 	</tr>
 	<tr>
-		<th>Select Widget</th>
+		<th>Foreign Key Widget</th>
 		<td>
-			<select is="select-widget">
-				<option>Testing 1</option>
-				<option>Testing 2</option>
-			</select>
+			
 		</td>
 	</tr>
 </table>
