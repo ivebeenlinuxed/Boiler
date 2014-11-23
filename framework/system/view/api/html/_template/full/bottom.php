@@ -21,7 +21,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'
 
 <script type="text/javascript" src="/plugins/boiler/widget/WidgetFactory.js"></script>
 
-
+<script type="text/javascript" src="/plugins/jquery-ui/jquery-ui.js"></script>
 
 <script type="text/javascript" src="/plugins/boiler/utils.js"></script>
 <script type="text/javascript" src="/plugins/boiler/api/text-instant.js"></script>
@@ -36,6 +36,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'
 
 <link rel="import" href="/widget/text/loader" />
 <link rel="import" href="/widget/foreign_key/loader" />
+<link rel="import" href="/widget/date/loader" />
 
 </body>
 </html>

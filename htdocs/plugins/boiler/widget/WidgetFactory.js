@@ -145,11 +145,15 @@ Widget.prototype = Object.create(HTMLInputElement.prototype, {
 				clearTimeout(this.relockTimeout);
 			}
 			this.relockTimeout = setTimeout(this.Lock.bind(this), 10000);
-			this.lock_rtc.publish("/lock/"+this.table+"/"+this.id+"/"+this.field, [], {"lock_id": lock_id});
+			if (this.lock_rtc) {
+				this.lock_rtc.publish("/lock/"+this.table+"/"+this.id+"/"+this.field, [], {"lock_id": lock_id});
+			}
 		}},
 		
 		Unlock: {value: function() {
-			this.lock_rtc.publish("/lock/"+this.table+"/"+this.id+"/"+this.field, [], {"lock_id": 0});
+			if (this.lock_rtc) {
+				this.lock_rtc.publish("/lock/"+this.table+"/"+this.id+"/"+this.field, [], {"lock_id": 0});
+			}
 		}},
 		
 });

@@ -15,6 +15,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'
 
 <link rel="stylesheet" type="text/css" href="/plugins/boiler/widget/search_expression/search_expression.css" />
 <link rel="stylesheet" type="text/css" href="/plugins/boiler/css/maxi-modal.css" />
+<link rel="stylesheet" type="text/css" href="/plugins/jquery-ui/jquery-ui.css" />
 </head>
 <body>
 	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">

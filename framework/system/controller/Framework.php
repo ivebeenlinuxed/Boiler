@@ -1,6 +1,8 @@
 <?php
 namespace Controller;
 
+use Ratchet\WebSocket\WsServer;
+
 class Framework {
 	function index() {
 	}
@@ -44,6 +46,15 @@ class Framework {
 			include $f;
 		} else {
 			"BAD";
+		}
+	}
+	
+	public function websocket_server() {
+		$wss = new \System\Library\RTC\WSServer\Server();
+		$wss->start();
+		while (true) {
+			echo ".";
+			sleep(2);
 		}
 	}
 }

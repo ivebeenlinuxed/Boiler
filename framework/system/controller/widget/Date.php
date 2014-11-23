@@ -1,11 +1,11 @@
 <?php
-namespace System\Library\Widget\Complex;
+namespace Controller\Widget;
 
-class Date extends \Library\Widget\Widget {
+class Date extends Widget {
 	
 	public function Render() {
 		if ($this->edit_mode) {
-			\Core\Router::loadView("widget/complex/date", array("controller"=>$this));
+			\Core\Router::loadView("widget/date/render", array("controller"=>$this));
 		} else {
 			$this->RenderEditlessSpan($this->getPlainTextResult());
 		}
@@ -15,5 +15,7 @@ class Date extends \Library\Widget\Widget {
 		return date("d/m/Y", $this->result);
 	}
 	
-	
+	public function loader() {
+		\Core\Router::loadView("widget/date/loader");
+	}
 }

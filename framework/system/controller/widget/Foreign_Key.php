@@ -2,13 +2,9 @@
 namespace Controller\Widget;
 
 class Foreign_Key extends \Library\Widget\Widget {
-	public $class;
+public $class;
 	public $name;
 	public $id;
-	
-	public function loader() {
-		echo "test";
-	}
 	
 	public function setDataFields($fields) {
 		parent::setDataFields($fields);
@@ -22,23 +18,37 @@ class Foreign_Key extends \Library\Widget\Widget {
 			$db = $class::getDB();
 			
 			$id = $class::getPrimaryKey()[0];
-			$this->id = $id;
 			
 			$select = $db->Select($class);
 			$select->addCount("c");
 			$r = $select->Exec();
-			if ((int)$r[0]['c'] < 30) {
-				\Core\Router::loadView("widget/html/select", array("id"=>$id, "class"=>$class, "type"=>$class, "rows"=>$class::getAll(), "controller"=>$this));
+			
+			$data = null;
+			if ($this->data_fields['filter']) {
+				$filter = json_decode($this->data_fields['filter'], true);
+				if (is_array($filter)) {
+					$data = $class::getByAttributes($filter);
+				}
+			}
+			if ($data === null) {
+				$data = $class::getAll();
+			}
+			
+			if (
+					(isset($this->data_fields['force_browse']) && $this->data_fields['force_browse'] == false)
+					|| (!isset($this->data_fields['force_browse']) && (int)$r[0]['c'] < 100)
+			) {
+				\Core\Router::loadView("widget/html/select", array("id"=>$id, "class"=>$class, "type"=>$class, "rows"=>$data, "controller"=>$this));
 			} else {
-				\Core\Router::loadView("widget/typeahead/typeahead", array("type"=>$table, "controller"=>&$this));
+				\Core\Router::loadView("widget/complex/foreign_key", array("type"=>$table, "controller"=>&$this));
 			}
 		} else {
 			$out = "";
-			if ($this->result && (!isset($this->data_fields['link']) || $this->data_fields['link'] != false)) {
+			if ($this->result !== null && (!isset($this->data_fields['link']) || $this->data_fields['link'] != false)) {
 				$out .= "<a href='/api/{$table}/{$this->result}'>";
 			}
 			$out .= $this->getPlainTextResult();
-			if ($this->result && (!isset($this->data_fields['link']) || $this->data_fields['link'] != false)) {
+			if ($this->result !== null && (!isset($this->data_fields['link']) || $this->data_fields['link'] != false)) {
 				$out .= "</a>";
 			}
 			echo $out;
@@ -46,12 +56,18 @@ class Foreign_Key extends \Library\Widget\Widget {
 	}
 	
 	public function getPlainTextResult() {
-		if ($this->result) {
+		if ($this->result !== null) {
 			$class = $this->class;
 			$row = new $class($this->result);
 			return $row->getName();
 		} else {
 			return "---";
 		}
+	}
+	
+
+
+	public static function loader() {
+		\Core\Router::loadView("widget/foreign_key/loader");
 	}
 }
