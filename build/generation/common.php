@@ -37,7 +37,7 @@ function getModels() {
 	
 	$q = pg_query("SELECT * FROM information_schema.tables WHERE table_catalog='{$settings['database']['passwd']}' AND table_schema='public' AND table_type != 'VIEW'");
 	$models = array();
-	while ($data = $q->fetch_assoc()) {
+	while ($data = pg_fetch_assoc()) {
 		$models[$data['table_name']] = array("columns"=>array(), "multi"=>array(), "single"=>array(), "key"=>array());
 	}
 	
