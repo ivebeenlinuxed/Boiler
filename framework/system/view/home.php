@@ -176,21 +176,37 @@ foreach (get_declared_classes() as $class) {
 
 <table class="table table-striped table-bordered">
 	<tr>
-		<th colspan="3">Widgets</th>
+		<th>Widgets</th>
+		<th>Anonymous Demo</th>
+		<th>Attached Demo</th>
 	</tr>
 	<tr>
 		<th>Text Widget</th>
 		<td><?php $w = new \Controller\Widget\Text(); $w->RenderAnonymous() ?></td>
+		<td></td>
 	</tr>
 	<tr>
 		<th>Date Widget</th>
 		<td><?php $w = new \Controller\Widget\Date(); $w->RenderAnonymous() ?></td>
+		<td></td>
 	</tr>
 	<tr>
 		<th>Foreign Key Widget</th>
 		<td>
-			
+			N/A - Table knowledge required
 		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<th>Checkbox</th>
+		<td><?php $w = new \Controller\Widget\Checkbox(); $w->RenderAnonymous() ?></td>
+		<td></td>
+	</tr>
+	<tr>
+		<th>Numeric</th>
+		<td><?php $w = new \Controller\Widget\Numeric(); $w->RenderAnonymous() ?></td>
+		<td></td>
 	</tr>
 </table>
 

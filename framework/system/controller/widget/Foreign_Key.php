@@ -1,7 +1,7 @@
 <?php
 namespace Controller\Widget;
 
-class Foreign_Key extends \Library\Widget\Widget {
+class Foreign_Key extends Widget {
 public $class;
 	public $name;
 	public $id;
