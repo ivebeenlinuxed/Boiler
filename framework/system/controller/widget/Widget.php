@@ -14,7 +14,7 @@ abstract class Widget {
 	public function getDataFields() {
 		$str = "";
 		foreach ($this->data_fields as $field=>$value) {
-			$str .= " data-{$field}={$value}";
+			$str .= " data-{$field}='{$value}'";
 		}
 		return $str;
 	}

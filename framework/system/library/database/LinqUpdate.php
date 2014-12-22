@@ -39,7 +39,7 @@ class LinqUpdate implements LinqQuery {
 
 	public function getTable() {
 		$o = $this->obj;
-		return "`".$o::getTable(true)."`";
+		return pg_escape_identifier($o::getTable(true));
 	}
 
 	public function addSet($field, $data=false) {
@@ -97,11 +97,11 @@ class LinqUpdate implements LinqQuery {
 
 		foreach ($this->set as $Key=>$Data) {
 			if ($Data === false) {
-				$sql .= "`".$this->DB->escape_string($Key)."`=DEFAULT, ";
+				$sql .= pg_escape_identifier($Key)."=DEFAULT, ";
 			} elseif ($Data === null) {
-				$sql .= "`".$this->DB->escape_string($Key)."`=NULL, ";
+				$sql .= pg_escape_identifier($Key)."=NULL, ";
 			} else {
-				$sql .= "`".$this->DB->escape_string($Key)."`='".$this->DB->escape_string($Data)."', ";
+				$sql .= pg_escape_identifier($Key)."=".pg_escape_literal($Data).", ";
 			}
 		}
 		$sql = substr($sql, 0, -2);
@@ -113,7 +113,7 @@ class LinqUpdate implements LinqQuery {
 		}
 
 		if ($this->order !== false) {
-			$sql .= " ORDER BY `".$this->DB->escape_string($this->order)."`";
+			$sql .= " ORDER BY ".pg_escape_identifier($this->order);
 			if ($this->orderAsc) {
 				$sql .= " ASC";
 			} else {

@@ -56,15 +56,16 @@ $url  = "/api/".$class::getTable().".html?";
 		<tr>
 			<?php 
 			foreach ($controller->columns as $column) {
-			$fp = $class::getFieldPropertiesByColumn($column[1]);
+			$fp = $class::getFieldPropertiesByColumn($column);
 
 			?>
-			<th><?php echo $fp->title;
+			<th><?php 
+			echo $fp->title;
 			$icon = "fa-sort";
 			
 			$new_query = $query;
 			if (count($controller->order) > 0 && $controller->order[0][0] == $column) {
-				if ($controller->order[0][1]!="DESC") {
+				if ($controller->order[0][1] != "DESC") {
 					$icon = "fa-sort-asc";
 					$new_query['__order'] = json_encode(array(array("{$column}", "DESC")));
 				} else {
@@ -94,7 +95,7 @@ $url  = "/api/".$class::getTable().".html?";
 				href="/api/<?php echo $class::getTable() ?>/<?php echo $row->$key ?>.html"
 				data-modal-result="<?php echo $row->$key ?>"> <?php
 		}
-		$widget = $row->getWidgetByField($column[1]);
+		$widget = $row->getWidgetByField($column);
 		$widget->edit_mode = false;
 		$widget->Render();
 

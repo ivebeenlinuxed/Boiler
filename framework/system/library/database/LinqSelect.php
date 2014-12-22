@@ -216,7 +216,7 @@ class LinqSelect implements LinqQuery {
 			} elseif (isset($this->order[0][0])) {
 				$sql .= " ORDER BY ";
 				foreach ($this->order as $cols) {
-					$sql .= pg_escape_literal($cols[0]);
+					$sql .= pg_escape_identifier($cols[0]);
 					if ($this->orderAsc) {
 						$sql .= " {$cols[1]} ";
 					} else {

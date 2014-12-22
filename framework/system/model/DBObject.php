@@ -809,11 +809,16 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	public function getWidgetByField($field) {
 		$map = self::getFieldPropertiesByColumn($field);
 		$w = new $map->widget;
+		$fields = $map->widget_data;
+		$map->widget_data['field'] = $field;
+		$map->widget_data['table'] = static::getTable();
+		$map->widget_data['id'] = $this->id;
+		
 		$w->setDataFields($map->widget_data);
 		//$w = \Library\Widget\Widget::getWidgetByClass(self::getWidgetTypeByColumn($field));
-		$w->field = $field;
-		$w->table = static::getTable();
-		$w->id = $this->id;
+		//$w->field = $field;
+		//$w->table = static::getTable();
+		//$w->id = $this->id;
 		$w->setResult($this->$field);
 		return $w;
 	}

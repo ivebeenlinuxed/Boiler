@@ -11,7 +11,7 @@ class Text extends Widget {
 		if ($this->edit_mode) {
 			echo "<input is='text-widget' value=\"" . htmlentities ( $this->result ) . "\" {$this->getDataFields()} />";
 		} else {
-			echo "<span data-table='{$this->table}' data-field='{$this->field}' data-id='{$this->id}'>" . htmlentities ( $this->result ) . "</span>";
+			echo "<span {$this->getDataFields()}>" . htmlentities ( $this->result ) . "</span>";
 		}
 	}
 	
