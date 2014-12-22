@@ -35,6 +35,11 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'
 		<div class="collapse navbar-collapse"
 			id="bs-example-navbar-collapse-1">
 			<ul class="nav navbar-nav navbar-right">
+				<li class="status-widget">
+					<a class="status-saved" href=""><i class="fa fa-check-square-o"></i> Saved</a>
+					<a class="status-saving hidden" href=""><i class="fa fa-spinner fa-spin"></i> Saving</a>
+					<a class="status-error hidden" href=""><i class="fa fa-exclamation-circle"></i> Saving Failed</a>
+				</li>
 				<li><a href="http://www.github.com/ivebeenlinuxed/boiler">Fork Me</a></li>
 			</ul>
 		</div>

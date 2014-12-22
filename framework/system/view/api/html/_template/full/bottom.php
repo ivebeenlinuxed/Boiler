@@ -32,6 +32,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'
 
 <script type="text/javascript" src="/plugins/boiler/widget/search_expression/search_expression.js"></script>
 <script type="text/javascript" src="/plugins/boiler/widget/tooltip-loader.js"></script>
+<script type="text/javascript" src="/plugins/boiler/widget/status_widget.js"></script>
 <script type="text/javascript" src="/plugins/bootstrap/js/bootstrap.min.js"></script>
 
 <link rel="import" href="/widget/text/loader" />

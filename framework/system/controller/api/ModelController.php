@@ -140,8 +140,13 @@ abstract class ModelController extends \Controller\BaseController {
 			//Array
 			$data = $this->Fetch($id);
 			$qData = $data->getResult();
-			$num_rows = $qData->num_rows;
-			$qData->free_result();
+			if ($class::getDatabaseType() == \Core\Router::DB_MYSQL) {
+				$num_rows = $qData->num_rows;
+			} else {
+				$num_rows = pg_num_rows($qData);
+			}
+			
+			pg_free_result($qData);
 			$data->setLimit($this->page*$this->page_size, $this->page_size);
 			$data = $data->Exec();
 			$this->raw_data = $data;

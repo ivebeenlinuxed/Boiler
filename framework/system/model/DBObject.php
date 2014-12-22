@@ -112,7 +112,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	public function __construct($Id) {
 		$c = get_called_class();
 		$DB = $c::getDB();
-		$Table = $DB->escape_string($this->getTable(true));
+		$Table = pg_escape_string($this->getTable(true));
 		$PrimaryKey = $this->getPrimaryKey();
 		$className = get_called_class();
 		if (!is_array($PrimaryKey)) {
@@ -704,11 +704,13 @@ abstract class DBObject implements \Library\Database\LinqObject {
 			$sQ = substr($sQ, 0, -4);
 		}
 		if ($start != null) {
-			$sQ .= " LIMIT ".$DB->escape_string($start);
-			if ($limit != null) {
-				$sQ .= ",".$DB->escape_string($limit);
-			}
+			$sQ .= " OFFSET ".$DB->escape_string($start);
 		}
+		
+		if ($limit != null) {
+			$sQ .= " LIMIT ".$DB->escape_string($limit);
+		}
+		
 		$q = $DB->query($sQ);
 		if ($DB->errno != 0) {
 			throw new DBException(self::getError($DB));
@@ -756,6 +758,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		return \Library\Database\LinqDB::getDB(\Core\Router::$settings['database']['server'], \Core\Router::$settings['database']['user'], \Core\Router::$settings['database']['passwd'], \Core\Router::$settings['database']['db'], \Core\Router::$settings['database']['port']);
 	}
 	
+	
 	public static function getWidgetTypeByColumn($col) {
 		if (static::$data_map[$col]) {
 			$r = static::$data_map[$col];
@@ -765,7 +768,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 				return $r->widget;
 			}
 		}
-		return \Library\Widget\Widget::TEXT;
+		return "\\Controller\\Widget\\Text";
 	}
 	
 	public static function getFieldPropertiesByColumn($col) {
@@ -775,16 +778,18 @@ abstract class DBObject implements \Library\Database\LinqObject {
 				$map->title = \System\Library\Lexical::humanize($col);
 			}
 		} else {
-			if ($key = $class::getForeignKeys()[$col]) {
+			$fks = $class::getForeignKeys();
+			if (is_array($fks) && isset($fks[$col])) {
+				$key = $fks[$col];
 				$map = new \Library\FieldProperties();
-				$map->widget = \Library\Widget\Widget::FOREIGN_KEY;
+				$map->widget = "\\Controller\\Widget\\ForeignKey";
 				$map->title = \System\Library\Lexical::humanize($col);
 				$map->widget_data['table'] = $key->table;
 				$map->visibility = \Library\FieldProperties::VISIBILITY_SHOW;
 				
 			} else {
 				$map = new \Library\FieldProperties();
-				$map->widget = \Library\Widget\Widget::TEXT;
+				$map->widget = "\\Controller\\Widget\\Text";
 				$map->title = \System\Library\Lexical::humanize($col);
 				$map->visibility = \Library\FieldProperties::VISIBILITY_SHOW;
 			}
@@ -794,7 +799,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	
 	public static function getWidgetByColumn($col) {
 		$map = self::getFieldPropertiesByColumn($col);
-		$w = \Library\Widget\Widget::getWidgetByClass($map->widget);
+		$w = new $map->widget;
 		$w->setDataFields($map->widget_data);
 		$w->table = static::getTable();
 		$w->field = $col;
@@ -803,7 +808,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 	
 	public function getWidgetByField($field) {
 		$map = self::getFieldPropertiesByColumn($field);
-		$w = \Library\Widget\Widget::getWidgetByClass($map->widget);
+		$w = new $map->widget;
 		$w->setDataFields($map->widget_data);
 		//$w = \Library\Widget\Widget::getWidgetByClass(self::getWidgetTypeByColumn($field));
 		$w->field = $field;

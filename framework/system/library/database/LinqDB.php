@@ -1,16 +1,15 @@
 <?php
 namespace Library\Database;
-class LinqDB extends \mysqli {
+class LinqDB {
 	protected $obj;
 	private static $masterDB;
 	public $db;
+	protected $resource;
 
 
 
 	function __construct($host=null, $user=null, $password=null, $db="", $port=null, $socket=null) {
-		parent::__construct($host, $user, $password, $db, $port, $socket);
-
-
+		$this->resource = pg_connect("host={$host} port={$port} dbname={$db} user={$user} password={$password}");
 	}
 	
 	/**
@@ -48,15 +47,22 @@ class LinqDB extends \mysqli {
 		return $f;
 	}
 
-	static function getDB($host=null, $user=null, $password=null, $db="") {
+	static function getDB($host=null, $user=null, $password=null, $db="", $port) {
 		if (!is_array(self::$masterDB)) {
 			self::$masterDB = array();
 		}
-		$hash = sha1($host.$user.$password.$db);
+		$hash = sha1($host.$user.$password.$db.$port);
 		if (!isset(self::$masterDB[$hash])) {
-			self::$masterDB[$hash] = new LinqDB($host, $user, $password, $db);
+			self::$masterDB[$hash] = new LinqDB($host, $user, $password, $db, $port);
 		}
 		return self::$masterDB[$hash];
+	}
+	
+	public function query($s) {
+		if (defined("DEBUG") && DEBUG == true) {
+			var_dump($s);
+		}
+		return pg_query($this->resource, $s);
 	}
 	
 	public function getResult($s) {
@@ -64,6 +70,9 @@ class LinqDB extends \mysqli {
 	}
 
 	function Exec($s) {
+		if (defined("DEBUG") && DEBUG == true) {
+			var_dump($s);
+		}
 		$o = $this->getResult($s);
 		$out = array();
 
@@ -76,7 +85,7 @@ class LinqDB extends \mysqli {
 			return $o;
 		}
 
-		while ($a = $o->fetch_assoc()) {
+		while ($a = pg_fetch_assoc($o)) {
 			$out[] = $a;
 		}
 		return $out;

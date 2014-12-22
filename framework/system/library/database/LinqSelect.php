@@ -70,7 +70,7 @@ class LinqSelect implements LinqQuery {
 	public function getFrom() {
 		if (!is_object($this->obj) && class_exists($this->obj) && \System\Library\StdLib::is_interface_of($this->obj, "\Library\Database\LinqObject")) {
 			$o = $this->obj;
-			return "`".$o::getTable(true)."`";
+			return pg_escape_identifier($o::getTable(true));
 		} else {
 			return "(".$this->obj->getSQL().") AS ".$this->name;
 		}
@@ -82,9 +82,9 @@ class LinqSelect implements LinqQuery {
 	public function getTable() {
 		if (!is_object($this->obj) && class_exists($this->obj) && \System\Library\StdLib::is_interface_of($this->obj, "\Library\Database\LinqObject")) {
 			$o = $this->obj;
-			return "`".$o::getTable(true)."`";
+			return pg_escape_identifier($o::getTable(true));
 		} else {
-			return "`".$this->name."`";
+			return pg_escape_identifier($this->name);
 		}
 	}
 	
@@ -100,7 +100,7 @@ class LinqSelect implements LinqQuery {
 			foreach ($this->fields as $field) {
 				$sql .= $field[0];
 				if ($field[1] != null) {
-					$sql .= " AS `{$field[1]}`";
+					$sql .= " AS ".pg_escape_identifier($field[1]);
 				}
 				$sql .= ", ";
 			}
@@ -147,7 +147,7 @@ class LinqSelect implements LinqQuery {
 		if (count($this->join) > 0) {
 			foreach ($this->join as $j) {
 				$sj = $j[2];
-				$sql .= " ".$j[0]." JOIN ".$sj->getFrom()." ON ".$sj->getTable().".`".$j[3]."`=".$this->getTable().".`".$j[1]."`";
+				$sql .= " ".$j[0]." JOIN ".$sj->getFrom()." ON ".$sj->getTable().".".pg_escape_literal($j[3])."=".$this->getTable().".".pg_escape_literal($j[1]);
 				$sql .= $sj->getJoins();
 			}
 
@@ -202,9 +202,9 @@ class LinqSelect implements LinqQuery {
 
 		if ($this->group !== false) {
 			if ($this->group[1] == false) {
-				$sql .= " GROUP BY ".$this->getTable().".`".$this->db->escape_string($this->group[0])."`";
+				$sql .= " GROUP BY ".$this->getTable().".".pg_escape_literal($this->group[0]);
 			} else {
-				$sql .= " GROUP BY ".$this->group[0];
+				$sql .= " GROUP BY ".pg_escape_literal($this->group[0]);
 			}
 		}
 		//if ($this->filter) {
@@ -216,7 +216,7 @@ class LinqSelect implements LinqQuery {
 			} elseif (isset($this->order[0][0])) {
 				$sql .= " ORDER BY ";
 				foreach ($this->order as $cols) {
-					$sql .= "`".$this->db->escape_string($cols[0])."`";
+					$sql .= pg_escape_literal($cols[0]);
 					if ($this->orderAsc) {
 						$sql .= " {$cols[1]} ";
 					} else {
@@ -229,11 +229,13 @@ class LinqSelect implements LinqQuery {
 		}
 
 		if ($this->start !== false) {
-			$sql .= " LIMIT {$this->start}";
-			if ($this->end !== false) {
-				$sql .= ",{$this->end}";
-			}
+			$sql .= " OFFSET {$this->start}";
 		}
+		
+		if ($this->end !== false) {
+			$sql .= " LIMIT {$this->end}";
+		}
+		
 		return $sql;
 	}
 	
@@ -283,9 +285,9 @@ class LinqSelect implements LinqQuery {
 	 */
 	function addField($f, $as=null) {
 		if ($f != "*") {
-			$f = "`".$f."`";
+			$f = pg_escape_identifier($f);
 		}
-		$this->fields[] = array($this->getTable().".".$this->db->escape_string($f), $this->db->escape_string($as));
+		$this->fields[] = array($this->getTable().".".$f, $as);
 		return $this;
 	}
 	
@@ -298,9 +300,9 @@ class LinqSelect implements LinqQuery {
 	 */
 	function getFullName($f) {
 		if ($f != "*") {
-			$f = "`".$f."`";
+			$f = pg_escape_literal($f);
 		}
-		return $this->getTable().".".$this->db->escape_string($f);
+		return $this->getTable().".".$f;
 	}
 	
 	/**
@@ -312,7 +314,7 @@ class LinqSelect implements LinqQuery {
 	 * @return \Model\Database\LinqSelect
 	 */
 	function addRaw($sum, $as) {
-		$this->fields[] = array($sum, $this->db->escape_string($as));
+		$this->fields[] = array($sum, pg_escape_string($as));
 		return $this;
 	}
 	
@@ -343,9 +345,9 @@ class LinqSelect implements LinqQuery {
 	 */
 	function addCount($field, $name="*") {
 		if ($name != "*") {
-			$name = "`".$this->db->escape_string($name)."`";
+			$name = pg_escape_literal($name);
 		}
-		$this->fields[] = array("COUNT(".$name.")", $this->db->escape_string($field));
+		$this->fields[] = array("COUNT(".$name.")", pg_escape_string($field));
 		return $this;
 	}
 	
@@ -358,8 +360,8 @@ class LinqSelect implements LinqQuery {
 	 * @return \Model\Database\LinqSelect
 	 */
 	function addMax($field, $name) {
-		$name = "`".$this->db->escape_string($name)."`";
-		$this->fields[] = array("MAX(".$name.")", $this->db->escape_string($field));
+		$name = pg_escape_literal($name);
+		$this->fields[] = array("MAX(".$name.")", pg_escape_string($field));
 		return $this;
 	}
 	
@@ -372,8 +374,8 @@ class LinqSelect implements LinqQuery {
 	 * @return \Model\Database\LinqSelect
 	 */
 	function addMin($field, $name) {
-		$name = "`".$this->db->escape_string($name)."`";
-		$this->fields[] = array("MIN(".$name.")", $this->db->escape_string($field));
+		$name = pg_escape_literal($name);
+		$this->fields[] = array("MIN(".$name.")", pg_escape_string($field));
 		return $this;
 	}
 	
@@ -386,8 +388,8 @@ class LinqSelect implements LinqQuery {
 	 * @return \Model\Database\LinqSelect
 	 */
 	function addAvg($field, $name) {
-		$name = "`".$this->db->escape_string($name)."`";
-		$this->fields[] = array("AVG(".$name.")", $this->db->escape_string($field));
+		$name = pg_escape_literal($name);
+		$this->fields[] = array("AVG(".$name.")", pg_escape_string($field));
 		return $this;
 	}
 	
@@ -401,8 +403,8 @@ class LinqSelect implements LinqQuery {
 	 * @return \Model\Database\LinqSelect
 	 */
 	function addSum($field, $name) {
-		$name = "`".$this->db->escape_string($name)."`";
-		$this->fields[] = array("SUM(".$name.")", $this->db->escape_string($field));
+		$name = pg_escape_string($name);
+		$this->fields[] = array("SUM(".$name.")", pg_escape_string($field));
 		return $this;
 	}
 	

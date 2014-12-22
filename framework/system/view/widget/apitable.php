@@ -56,7 +56,7 @@ $url  = "/api/".$class::getTable().".html?";
 		<tr>
 			<?php 
 			foreach ($controller->columns as $column) {
-			$fp = $class::getFieldPropertiesByColumn($column);
+			$fp = $class::getFieldPropertiesByColumn($column[1]);
 
 			?>
 			<th><?php echo $fp->title;
@@ -94,7 +94,7 @@ $url  = "/api/".$class::getTable().".html?";
 				href="/api/<?php echo $class::getTable() ?>/<?php echo $row->$key ?>.html"
 				data-modal-result="<?php echo $row->$key ?>"> <?php
 		}
-		$widget = $row->getWidgetByField($column);
+		$widget = $row->getWidgetByField($column[1]);
 		$widget->edit_mode = false;
 		$widget->Render();
 

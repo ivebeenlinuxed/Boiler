@@ -15,7 +15,10 @@ foreach ($models as $table=>$model) {
 	} else {
 		$extend = "\Model\DBObject";
 	}
-	
+	if (!is_array($models[$table]['key']) || count($models[$table]['key']) == 0) {
+		echo "SKIPPING $f - NO PRIMARY KEY\r\n";
+		continue;
+	}
 	echo "BUILDING $f (extends $extend)\r\n";
 	$className = getClassName($table);
 	$pkey = '"'.implode('","', $models[$table]['key']).'"';
@@ -57,11 +60,11 @@ EOF;
 class $className extends $extend {
 EOF;
 	foreach ($models[$table]['columns'] as $column=>$desc) {
-		if (substr($desc, 0, strlen("varchar")) == "varchar") {
+		if ($desc == "character varying" || $desc == "string") {
 			$type = "string";
-		} elseif (substr($desc, 0, strlen("int")) == "int") {
+		} elseif ($desc == "integer") {
 			$type = "int";
-		} elseif (substr($desc, 0, strlen("int")) == "bool") {
+		} elseif ($desc == "boolean") {
 			$type = "boolean";
 		} else {
 			$type = "unknown_type";
@@ -79,6 +82,12 @@ EOF;
 EOF;
 	}
 	$file .= <<<EOF
+	/**
+	 * Defines the type of database
+	*/
+	public static function getDatabaseType() {
+		return \Core\Router::DB_POSTGRES;
+	}
 	
 	/**
 	 * Lists all the columns in the database

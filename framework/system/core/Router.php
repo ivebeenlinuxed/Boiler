@@ -22,6 +22,9 @@ abstract class Router {
 	const MODE_JS = 7;
 	const MODE_CSS = 8;
 	
+	const DB_POSTGRES = 0;
+	const DB_MYSQL = 1;
+	
 	public static $mode;
 
 	public static $settings;

@@ -35,9 +35,9 @@ function getModels() {
 	$settings = \Core\Router::$settings;
 	$d = pg_connect("host={$settings['database']['server']} port={$settings['database']['port']} dbname={$settings['database']['db']} user={$settings['database']['user']} password={$settings['database']['passwd']}");
 	
-	$q = pg_query("SELECT * FROM information_schema.tables WHERE table_catalog='{$settings['database']['passwd']}' AND table_schema='public' AND table_type != 'VIEW'");
+	$q = pg_query("SELECT * FROM information_schema.tables WHERE table_catalog='{$settings['database']['db']}' AND table_schema='public' AND table_type != 'VIEW'");
 	$models = array();
-	while ($data = pg_fetch_assoc()) {
+	while ($data = pg_fetch_assoc($q)) {
 		$models[$data['table_name']] = array("columns"=>array(), "multi"=>array(), "single"=>array(), "key"=>array());
 	}
 	
@@ -46,9 +46,6 @@ function getModels() {
 		while ($data = pg_fetch_assoc($q)) {
 			$models[$table]['columns'][$data['column_name']] = $data['data_type'];
 		}
-		
-
-		$q = pg_query("");
 		
 		$q = pg_query("SELECT               
   pg_attribute.attname, 

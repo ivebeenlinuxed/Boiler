@@ -23,6 +23,10 @@ abstract class Widget {
 		$this->data_fields = $fields;
 	}
 	
+	public function setResult($result) {
+		$this->result = $result;
+	}
+	
 	public function getPlainTextResult() {
 		return $this->result;
 	}

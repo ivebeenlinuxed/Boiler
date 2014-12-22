@@ -88,14 +88,14 @@ abstract class LinqEquality {
 		}
 		$obj = "";
 		if ($this->name != "") {
-			$obj = "`".$this->name."`.";
+			$obj = $this->name.".";
 		}
 
 		foreach ($this->fields as $field) {
 			if (isset($field[3])) {
 				switch ($field[3]) {
 					case self::FIELD:
-						$field[0] = "$obj`".$this->db->escape_string($field[0])."`";
+						$field[0] = $obj.pg_escape_identifier($field[0]);
 						break;
 					case self::VALUE:
 						$field[0] = $this->getValue($field[0]);
@@ -109,7 +109,7 @@ abstract class LinqEquality {
 							var_dump($field);
 							throw new DBException("Field value cannot be an object");
 						}
-						$field[2] = "$obj`".$this->db->escape_string($field[2])."`";
+						$field[2] = $obj.pg_escape_identifier($field[2]);
 						break;
 					case self::VALUE:
 						$field[2] = $this->getValue($field[2]);
@@ -142,7 +142,7 @@ abstract class LinqEquality {
 	private function getValue($va) { //,$SQ
 		$v = "";
 		if (is_int($va) || is_bool($va) || is_float($va) || is_string($va)) {
-			$v = "'".$this->db->escape_string($va)."'";
+			$v = pg_escape_literal($va);
 		} elseif (is_subclass_of($va, "\Library\Database\LinqQuery")) {
 			/*switch ($SQ) {
 				case self::SUBQUERY_ANY:
