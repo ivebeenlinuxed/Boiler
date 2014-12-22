@@ -79,13 +79,12 @@ FROM
 WHERE constraint_type = 'FOREIGN KEY' AND tc.table_name='{$table}';
 EOF;
 		//FIXME FK doesn't work
-		if (false) {
-			$q = $d->query($sQuery);
-			while ($data = $q->fetch_assoc()) {
-				$models[$data['TABLE_NAME']]['multi'][$data['CONSTRAINT_NAME']] = array($data['COLUMN_NAME'], $data['REFERENCED_TABLE_NAME'], $data['REFERENCED_COLUMN_NAME']);
-				$models[$data['REFERENCED_TABLE_NAME']]['single'][$data['CONSTRAINT_NAME']] = array($data['REFERENCED_COLUMN_NAME'], $data['TABLE_NAME'], $data['COLUMN_NAME']);
-			}
+		$q = pg_query($sQuery);
+		while ($data = pg_fetch_assoc($q)) {
+			$models[$data['table_name']]['multi'][$data['constraint_name']] = array($data['column_name'], $data['foreign_table_name'], $data['foreign_column_name']);
+			$models[$data['foreign_table_name']]['single'][$data['constraint_name']] = array($data['foreign_column_name'], $data['table_name'], $data['column_name']);
 		}
+		
 		
 		
 	}
