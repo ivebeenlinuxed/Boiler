@@ -291,7 +291,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 
 		$sQ = "DELETE FROM `".$c::getTable()."` WHERE";
 		foreach ($p as $key) {
-			$sQ .= "`".$DB->escape_string($key)."`='".$this->$key."' AND";
+			$sQ .= pg_escape_literal($key)."=".pg_escape_string($this->$key)." AND";
 		}
 		$sQ = substr($sQ, 0, -4);
 
@@ -577,14 +577,14 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		$sQ = "INSERT INTO `".$class['Table']."`";
 			$sQ .= " (";
 			foreach ($Array as $Key=>$Data) {
-				$sQ .= "`".$DB->escape_string($Key)."`, ";
+				$sQ .= pg_escape_identifier($Key).", ";
 			}
 			$sQ = substr($sQ, 0, -2);
 			$sQ .= ") VALUES (";
 	
 			foreach ($Array as $Key=>$Data) {
 				if ($Data !== false && $Data !== null) {
-					$sQ .= "'".$DB->escape_string($Data)."', ";
+					$sQ .= pg_escape_literal($Data).", ";
 				} else {
 					$sQ .= "NULL, ";
 				}
@@ -699,16 +699,16 @@ abstract class DBObject implements \Library\Database\LinqObject {
 		if ($array != null) {
 			$sQ .= " WHERE ";
 			foreach ($array as $Key=>$Data) {
-				$sQ .= "`".$DB->escape_string($Key)."`= '".$DB->escape_string($Data)."' AND ";
+				$sQ .= pg_escape_identifier($Key)."= ".pg_escape_literal($Data)." AND ";
 			}
 			$sQ = substr($sQ, 0, -4);
 		}
 		if ($start != null) {
-			$sQ .= " OFFSET ".$DB->escape_string($start);
+			$sQ .= " OFFSET ".((int)$start);
 		}
 		
 		if ($limit != null) {
-			$sQ .= " LIMIT ".$DB->escape_string($limit);
+			$sQ .= " LIMIT ".((int)$limit);
 		}
 		
 		$q = $DB->query($sQ);
