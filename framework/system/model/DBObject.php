@@ -291,7 +291,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 
 		$sQ = "DELETE FROM `".$c::getTable()."` WHERE";
 		foreach ($p as $key) {
-			$sQ .= pg_escape_literal($key)."=".pg_escape_string($this->$key)." AND";
+			$sQ .= " ".pg_escape_literal($key)."=".pg_escape_string($this->$key)." AND";
 		}
 		$sQ = substr($sQ, 0, -4);
 
