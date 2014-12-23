@@ -574,7 +574,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 			}
 		}
 
-		$sQ = "INSERT INTO `".$class['Table']."`";
+		$sQ = "INSERT INTO ".pg_escape_identifier($class['Table']);
 			$sQ .= " (";
 			foreach ($Array as $Key=>$Data) {
 				$sQ .= pg_escape_identifier($Key).", ";
@@ -592,7 +592,7 @@ abstract class DBObject implements \Library\Database\LinqObject {
 			$sQ = substr($sQ, 0, -2);
 			$sQ .= ")";
 		$DB->query($sQ);
-		$id = $DB->insert_id;
+		$id = pg_fetch_array($DB->query("SELECT lastval()"))[0];
 		if ($DB->errno != 0) {
 			$e = self::getError($DB);
 			if (substr($e, 0, 15) == "Duplicate entry") {
