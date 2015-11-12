@@ -1,47 +1,47 @@
+# Boiler Framework
+
 To install simply move htdocs to your public html directory, then set BOILER_LOCATION on line 3 of index to point to the framework folder.
 
 Controllers are the start point of your page.
 
-Testing and Building
-====================
+## Testing and Building
 
 Building and testing (optional) is done with a build.xml make file for "ant". You may also consider using the following to help test your code.
 
 The following tools have a config shipped with ant targets, and are fully compatible with Hudson/Jenkins CI
 
 * PHP Mess Detector 
-
+```
 wget http://static.phpmd.org/php/latest/phpmd.phar
 chmod 0755 phpmd.phar
 sudo mv phpmd.phar /usr/local/bin/phpmd
- 
+```
 * PHP CodeSniffer
-
+```
 wget https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
 chmod 0755 phpcs.phar
 sudo mv phpcs.phar /usr/local/bin/phpcs
-
+```
 * PHP Copy and Paste detector
-
+```
 wget https://phar.phpunit.de/phpcpd.phar
 chmod 0755 phpcpd.phar
 sudo mv phpcpd.phar /usr/local/bin/phpcpd
-
+```
 * PHPUnit
-
+```
 wget https://phar.phpunit.de/phpunit.phar
 chmod 0755 phpcpd.phar
 sudo mv phpcpd.phar /usr/local/bin/phpcpd
-
+```
 * PHPUnit skelgen
-
+```
 wget https://phar.phpunit.de/phpunit-skelgen.phar
 chmod 0755 phpunit-skelgen.phar
 sudo mv phpunit-skelgen.phar /usr/local/bin/phpunit-skelgen
+```
 
-
-CONTROLLERS
-===========
+## Controllers
 
 -Namespacing follows folder structure to allow PHP lazy loading (please see php.net for Namespacing and __autoload)
 -All classes must be namespaced with Controller. This is to allow you to have a controller and model, for example, with the same name.
@@ -49,27 +49,31 @@ CONTROLLERS
 -First letter only of class is capitalized
 
 Examples:
-
+```
 http://localhost/class/function/args1/args2/args3
+```
 
 Would execute:
+```php
 $c = new \Controller\Class();
 $c->function(args1, args2, args3);
-
+```
+```
 http://localhost/ns1/ns2/ns3/class/function
-
+```
 Would Execute:
+```php
 $c = new \Controller\ns1\ns2\ns3\Class();
 $c->function();
+```
 
-
-MODELS
-======
+## Models
 
 -Models should extend DBObject normally for MySQL objects
 -Models must be namespaced
 -DBObject class (found in application/model/DBObject.php) must have login details entered for PHP
 
+```php
 <?php
 namespace Model;
 class MySQLTable extends DBObject {
@@ -85,7 +89,7 @@ class MySQLTable extends DBObject {
 }
 //That's it! No SQL! Your MySQL settings are retrieved from a config.php file, built by ant. This stops you committing your MySQL details to git - pretty irritating!
 ?>
-
+```
 
 
 
@@ -96,7 +100,7 @@ More advanced functions:
 N.B. This is a demo which came from when the framework was not namespaced.
 
 
-
+```php
 <?php
 
 ini_set('display_errors', "On");
@@ -168,10 +172,10 @@ class EmployeeJob extends DBObject {
 	}
 }
 
-
 /*
 Jobs table
 */
+
 class Job extends DBObject {
 	public static function getPrimaryKey() {
 		//Use an array for concatinated keys
@@ -346,4 +350,4 @@ $qEmployeeJob->joinLeft("job", $qJob, "id");
 
 var_dump($qEmployeeJob->Exec());
 ?>
-
+```
