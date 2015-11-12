@@ -11,28 +11,33 @@ The following tools have a config shipped with ant targets, and are fully compat
 
 * PHP Mess Detector 
 
-pear channel-discover pear.phpmd.org 
-pear channel-discover pear.pdepend.org 
-pear install --alldeps phpmd/PHP_PMD
+wget http://static.phpmd.org/php/latest/phpmd.phar
+chmod 0755 phpmd.phar
+sudo mv phpmd.phar /usr/local/bin/phpmd
  
 * PHP CodeSniffer
 
-pear install PHP_CodeSniffer
+wget https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
+chmod 0755 phpcs.phar
+sudo mv phpcs.phar /usr/local/bin/phpcs
 
 * PHP Copy and Paste detector
 
-pear channel-discover components.ez.no
-pear install phpunit/phpcpd
+wget https://phar.phpunit.de/phpcpd.phar
+chmod 0755 phpcpd.phar
+sudo mv phpcpd.phar /usr/local/bin/phpcpd
 
 * PHPUnit
 
-pear channel-discover pear.phpunit.de
-pear channel-discover pear.symfony-project.com
-pear install phpunit/PHPUnit
+wget https://phar.phpunit.de/phpunit.phar
+chmod 0755 phpcpd.phar
+sudo mv phpcpd.phar /usr/local/bin/phpcpd
 
 * PHPUnit skelgen
 
-pear install phpunit/PHPUnit_SkeletonGenerator
+wget https://phar.phpunit.de/phpunit-skelgen.phar
+chmod 0755 phpunit-skelgen.phar
+sudo mv phpunit-skelgen.phar /usr/local/bin/phpunit-skelgen
 
 
 CONTROLLERS
