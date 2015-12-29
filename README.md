@@ -32,7 +32,7 @@ sudo mv phpcpd.phar /usr/local/bin/phpcpd
 ```
 wget https://phar.phpunit.de/phpunit.phar
 chmod 0755 phpunit.phar
-sudo mv phpcpd.phar /usr/local/bin/phpunit
+sudo mv phpunit.phar /usr/local/bin/phpunit
 ```
 * PHPUnit skelgen
 ```
